@@ -132,13 +132,15 @@
   <span class="brand">CLAUDE PANEL</span>
   <span class="who" id="who"></span>
   <span class="right">
+    <button class="badge" id="langBtn" title="język / language"
+            style="cursor:pointer;background:none;font-family:inherit">EN</button>
     <span class="badge" id="fresh">—</span>
     <span class="clock" id="clock">--:--</span>
   </span>
 </header>
 
 <div id="frozen">
-  <div class="h">DANE ZAMROŻONE</div>
+  <div class="h" data-i18n="frozenH">DANE ZAMROŻONE</div>
   <div class="p" id="frozenP">brak kontaktu z serwerem — pokazane liczby są nieaktualne</div>
 </div>
 
@@ -161,7 +163,7 @@
                 stroke-linecap="round" stroke-dasharray="270" stroke-dashoffset="270"/></svg>
       <div class="v" id="v5">–</div>
     </div>
-    <div class="ginfo"><div class="name">LIMIT 5H</div><div class="reset" id="r5">—</div>
+    <div class="ginfo"><div class="name" data-i18n="g5">LIMIT 5H</div><div class="reset" id="r5">—</div>
       <div class="sev" id="s5"></div></div>
   </div>
 
@@ -172,7 +174,7 @@
                 stroke-linecap="round" stroke-dasharray="270" stroke-dashoffset="270"/></svg>
       <div class="v" id="vW">–</div>
     </div>
-    <div class="ginfo"><div class="name">TYDZIEŃ — ŁĄCZNIE</div><div class="reset" id="rW">—</div>
+    <div class="ginfo"><div class="name" data-i18n="gW">TYDZIEŃ — ŁĄCZNIE</div><div class="reset" id="rW">—</div>
       <div class="sev" id="sW"></div></div>
   </div>
 
@@ -189,28 +191,89 @@
 </div>
 
 <div class="stats">
-  <div class="card stat"><div class="k">OUT / OKNO 5H</div><div class="v" id="o5">–</div><div class="s" id="o5s">&nbsp;</div></div>
-  <div class="card stat"><div class="k">OUT / DZIŚ</div><div class="v" id="od">–</div><div class="s" id="ods">&nbsp;</div></div>
-  <div class="card stat"><div class="k">OUT / 7 DNI</div><div class="v" id="o7">–</div><div class="s" id="o7s">&nbsp;</div></div>
-  <div class="card stat"><div class="k">SESJE</div><div class="v" id="ses">–</div><div class="s" id="sesS">&nbsp;</div></div>
+  <div class="card stat"><div class="k" data-i18n="k5">OUT / OKNO 5H</div><div class="v" id="o5">–</div><div class="s" id="o5s">&nbsp;</div></div>
+  <div class="card stat"><div class="k" data-i18n="kToday">OUT / DZIŚ</div><div class="v" id="od">–</div><div class="s" id="ods">&nbsp;</div></div>
+  <div class="card stat"><div class="k" data-i18n="k7">OUT / 7 DNI</div><div class="v" id="o7">–</div><div class="s" id="o7s">&nbsp;</div></div>
+  <div class="card stat"><div class="k" data-i18n="kSes">SESJE</div><div class="v" id="ses">–</div><div class="s" id="sesS">&nbsp;</div></div>
 </div>
 
 <div class="card">
-  <h2>Tokeny wyjściowe — ostatnie 24 h</h2>
+  <h2 data-i18n="hChart">Tokeny wyjściowe — ostatnie 24 h</h2>
   <div class="chart" id="chart"></div>
   <div class="axis" id="axis"></div>
 </div>
 
 <div class="two">
-  <div class="card"><h2>Modele — 7 dni</h2><div id="models"></div></div>
-  <div class="card"><h2>Projekty — 7 dni</h2><div id="projects"></div></div>
-  <div class="card"><h2>Kto zużywa — 7 dni</h2><div id="split"></div></div>
+  <div class="card"><h2 data-i18n="hModels">Modele — 7 dni</h2><div id="models"></div></div>
+  <div class="card"><h2 data-i18n="hProjects">Projekty — 7 dni</h2><div id="projects"></div></div>
+  <div class="card"><h2 data-i18n="hSplit">Kto zużywa — 7 dni</h2><div id="split"></div></div>
 </div>
 
-<div class="card"><h2>Aktywne sesje</h2><div id="sessions"></div></div>
+<div class="card"><h2 data-i18n="hSessions">Aktywne sesje</h2><div id="sessions"></div></div>
 
 <script>
 var C = 2 * Math.PI * 43;
+
+// ---- język / language ----
+var I18N = {
+  pl: {
+    g5:'LIMIT 5H', gW:'TYDZIEŃ — ŁĄCZNIE', gModel:'TYDZIEŃ — ',
+    k5:'OUT / OKNO 5H', kToday:'OUT / DZIŚ', k7:'OUT / 7 DNI', kSes:'SESJE',
+    hChart:'Tokeny wyjściowe — ostatnie 24 h', hModels:'Modele — 7 dni',
+    hProjects:'Projekty — 7 dni', hSplit:'Kto zużywa — 7 dni', hSessions:'Aktywne sesje',
+    frozenH:'DANE ZAMROŻONE',
+    frozenP:'brak kontaktu z serwerem od {0} s — pokazane liczby są nieaktualne. Uruchom start.bat.',
+    resetNow:'reset lada moment', resetDH:'reset za {0} d {1} h',
+    resetHM:'reset za {0} h {1} min', resetM:'reset za {0} min',
+    noData:'brak danych', used:'wykorzystane', weeklyLimit:'LIMIT TYGODNIOWY', limit5:'LIMIT 5H',
+    answers:'odpowiedzi', fromCache:'z cache', sesSub:'aktywne / procesy claude.exe',
+    resp:'odp.', tagOwn:'twoja nazwa', tagAI:'auto', tagPrompt:'z promptu', tagAgents:'{0} agentów',
+    noSessions:'nic teraz nie pracuje', noLimits:'brak limitów',
+    limitsAgo:'limity: {0} temu · {1}', srcFile:'plik', apiErr:'błąd odpytywania API: ',
+    serverDown:'serwer nie odpowiada',
+    wait1:'Claude czeka na Twoją odpowiedź', waitN:'{0} sesje czekają na Ciebie',
+    splitMain:'sesje główne', splitAgents:'agenci / workflow',
+    locale:'pl-PL', btn:'EN'
+  },
+  en: {
+    g5:'5H LIMIT', gW:'WEEKLY — TOTAL', gModel:'WEEKLY — ',
+    k5:'OUT / 5H WINDOW', kToday:'OUT / TODAY', k7:'OUT / 7 DAYS', kSes:'SESSIONS',
+    hChart:'Output tokens — last 24 h', hModels:'Models — 7 days',
+    hProjects:'Projects — 7 days', hSplit:'Usage split — 7 days', hSessions:'Active sessions',
+    frozenH:'DATA FROZEN',
+    frozenP:'no contact with the server for {0} s — the numbers shown are stale. Run start.bat.',
+    resetNow:'resets any moment', resetDH:'resets in {0} d {1} h',
+    resetHM:'resets in {0} h {1} min', resetM:'resets in {0} min',
+    noData:'no data', used:'used', weeklyLimit:'WEEKLY LIMIT', limit5:'5H LIMIT',
+    answers:'responses', fromCache:'cached', sesSub:'active / claude.exe processes',
+    resp:'resp.', tagOwn:'your title', tagAI:'auto', tagPrompt:'from prompt', tagAgents:'{0} agents',
+    noSessions:'nothing running right now', noLimits:'no limits data',
+    limitsAgo:'limits: {0} ago · {1}', srcFile:'file', apiErr:'usage API error: ',
+    serverDown:'server not responding',
+    wait1:'Claude is waiting for your reply', waitN:'{0} sessions waiting for you',
+    splitMain:'main sessions', splitAgents:'agents / workflows',
+    locale:'en-GB', btn:'PL'
+  }
+};
+var lang = localStorage.getItem('panelLang') || 'pl';
+function t(key){
+  var s = (I18N[lang] || I18N.pl)[key] || key;
+  for (var i = 1; i < arguments.length; i++) s = s.replace('{' + (i - 1) + '}', arguments[i]);
+  return s;
+}
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.getElementById('langBtn').textContent = t('btn');
+  document.documentElement.lang = lang;
+}
+document.getElementById('langBtn').onclick = function(){
+  lang = lang === 'pl' ? 'en' : 'pl';
+  localStorage.setItem('panelLang', lang);
+  applyLang();
+  tick();
+};
 
 // Tytuly sesji pochodza z tekstu uzytkownika/modelu i ladują do innerHTML.
 function esc(s){
@@ -231,18 +294,18 @@ function until(iso){
   if (!iso) return '—';
   var d = new Date(iso); if (isNaN(d)) return '—';
   var diff = d - Date.now();
-  if (diff <= 0) return 'reset lada moment';
+  if (diff <= 0) return t('resetNow');
   var h = Math.floor(diff/3600000), m = Math.floor(diff%3600000/60000);
-  if (h >= 24) return 'reset za ' + Math.floor(h/24) + ' d ' + (h%24) + ' h';
-  if (h) return 'reset za ' + h + ' h ' + m + ' min';
-  return 'reset za ' + m + ' min';
+  if (h >= 24) return t('resetDH', Math.floor(h/24), h%24);
+  if (h) return t('resetHM', h, m);
+  return t('resetM', m);
 }
 
 function gauge(arcId, valId, resId, sevId, lim, color){
   var arc = document.getElementById(arcId), val = document.getElementById(valId),
       res = document.getElementById(resId), sev = document.getElementById(sevId);
   if (!lim || lim.percent == null){
-    val.textContent = '–'; res.textContent = 'brak danych';
+    val.textContent = '–'; res.textContent = t('noData');
     arc.setAttribute('stroke-dashoffset', C); sev.textContent = ''; return;
   }
   var p = Math.max(0, Math.min(100, lim.percent));
@@ -257,7 +320,7 @@ function gauge(arcId, valId, resId, sevId, lim, color){
 }
 
 function bars(list, keyName, keyVal, colorVar){
-  if (!list.length) return '<div class="empty">brak danych</div>';
+  if (!list.length) return '<div class="empty">' + t('noData') + '</div>';
   var max = Math.max.apply(null, list.map(function(x){ return x[keyVal]; })) || 1;
   return list.map(function(x){
     var w = Math.max(2, Math.round(x[keyVal] / max * 100));
@@ -274,7 +337,7 @@ function drawChart(hourly){
     var pct = Math.max(1, Math.round(h.out / max * 100));
     var d = new Date(h.t);
     return '<div class="b' + (i === last ? ' now' : '') + '" style="height:' + pct + '%" title="' +
-           d.getHours() + ':00 — ' + fmt(h.out) + ' out, ' + h.msgs + ' odp."></div>';
+           d.getHours() + ':00 — ' + fmt(h.out) + ' out, ' + h.msgs + ' ' + t('resp') + '"></div>';
   }).join('');
   document.getElementById('axis').innerHTML = hourly.map(function(h, i){
     var d = new Date(h.t);
@@ -288,11 +351,11 @@ function render(s){
   gauge('a5','v5','r5','s5', L.session, null);
   gauge('aW','vW','rW','sW', L.weekly, 'var(--acc)');
   gauge('aF','vF','rF','sF', L.scoped, 'var(--fable)');
-  document.getElementById('nF').textContent = 'TYDZIEŃ — ' + scName;
+  document.getElementById('nF').textContent = t('gModel') + scName;
 
   // Pasek krytyczny - bierze najgorszy z trzech limitow.
   var crit = null;
-  [['LIMIT 5H', L.session], ['LIMIT TYGODNIOWY', L.weekly], [scName, L.scoped]].forEach(function(p){
+  [[t('limit5'), L.session], [t('weeklyLimit'), L.weekly], [scName, L.scoped]].forEach(function(p){
     var l = p[1];
     if (!l || l.percent == null) return;
     if (l.severity === 'critical' || l.percent >= 85){
@@ -302,7 +365,7 @@ function render(s){
   var cb = document.getElementById('crit');
   if (crit){
     cb.className = 'critical on';
-    document.getElementById('critTxt').textContent = '⚠ ' + crit.n + ' — ' + crit.p + '% wykorzystane';
+    document.getElementById('critTxt').textContent = '⚠ ' + crit.n + ' — ' + crit.p + '% ' + t('used');
     document.getElementById('critSub').textContent = until(crit.r);
   } else cb.className = 'critical';
 
@@ -311,15 +374,15 @@ function render(s){
 
   var w5 = s.window5h || {}, w7 = s.window7d || {}, td = s.today || {};
   document.getElementById('o5').textContent = fmt(w5.out);
-  document.getElementById('o5s').textContent = (w5.msgs||0) + ' odpowiedzi · z cache ' + fmt(w5.total);
+  document.getElementById('o5s').textContent = (w5.msgs||0) + ' ' + t('answers') + ' · ' + t('fromCache') + ' ' + fmt(w5.total);
   document.getElementById('od').textContent = fmt(td.out);
-  document.getElementById('ods').textContent = (td.msgs||0) + ' odpowiedzi';
+  document.getElementById('ods').textContent = (td.msgs||0) + ' ' + t('answers');
   document.getElementById('o7').textContent = fmt(w7.out);
-  document.getElementById('o7s').textContent = (w7.msgs||0) + ' odpowiedzi';
+  document.getElementById('o7s').textContent = (w7.msgs||0) + ' ' + t('answers');
 
   var ses = s.sessions || [];
   document.getElementById('ses').textContent = ses.length + ' / ' + s.processes;
-  document.getElementById('sesS').textContent = 'aktywne / procesy claude.exe';
+  document.getElementById('sesS').textContent = t('sesSub');
 
   drawChart(s.hourly || []);
 
@@ -328,48 +391,54 @@ function render(s){
   mods.sort(function(a,b){ return b.out - a.out; });
   document.getElementById('models').innerHTML = bars(mods, 'name', 'out', 'var(--fable)');
   document.getElementById('projects').innerHTML = bars(s.projects || [], 'name', 'out', 'var(--acc)');
-  document.getElementById('split').innerHTML = bars(s.split || [], 'name', 'out', 'var(--ok)');
+  // nazwy z serwera sa po polsku - mapujemy na biezacy jezyk
+  var split = (s.split || []).map(function(x){
+    var n = x.name === 'sesje główne' ? t('splitMain')
+          : x.name === 'agenci / workflow' ? t('splitAgents') : x.name;
+    return { name: n, out: x.out };
+  });
+  document.getElementById('split').innerHTML = bars(split, 'name', 'out', 'var(--ok)');
 
   document.getElementById('sessions').innerHTML = ses.length
     ? ses.map(function(x){
-        var kind = x.titleKind === 'wlasny' ? '<span class="tag own">twoja nazwa</span>'
-                 : x.titleKind === 'ai'     ? '<span class="tag">auto</span>'
-                 : x.titleKind === 'prompt' ? '<span class="tag">z promptu</span>' : '';
-        var ag = x.agents ? '<span class="tag">' + x.agents + ' agentów</span>' : '';
+        var kind = x.titleKind === 'wlasny' ? '<span class="tag own">' + t('tagOwn') + '</span>'
+                 : x.titleKind === 'ai'     ? '<span class="tag">' + t('tagAI') + '</span>'
+                 : x.titleKind === 'prompt' ? '<span class="tag">' + t('tagPrompt') + '</span>' : '';
+        var ag = x.agents ? '<span class="tag">' + t('tagAgents', x.agents) + '</span>' : '';
         return '<div class="rowline"><span class="live"></span>' +
                '<span class="n" style="min-width:300px;flex:1">' + esc(x.title) + '</span>' +
                kind + ag +
                '<span class="muted" style="font-size:12px">' + x.project + '</span>' +
                '<span class="num">' + Math.round(x.idleMs/1000) + ' s</span></div>';
       }).join('')
-    : '<div class="empty">nic teraz nie pracuje</div>';
+    : '<div class="empty">' + t('noSessions') + '</div>';
 
   var el = document.getElementById('fresh');
-  if (L.ageMs == null){ el.textContent = 'brak limitów'; el.className = 'badge bad'; }
+  if (L.ageMs == null){ el.textContent = t('noLimits'); el.className = 'badge bad'; }
   else {
     var sec = Math.round(L.ageMs/1000);
     var age = sec < 90 ? sec + ' s'
             : sec < 5400 ? Math.round(sec/60) + ' min'
             : (sec/3600).toFixed(1) + ' h';
     // zrodlo: 'api' = odpytujemy sami co 2 min, 'plik' = czekamy na Claude Code
-    var src = L.source === 'api' ? 'API' : 'plik';
-    el.textContent = 'limity: ' + age + ' temu · ' + src;
-    el.title = L.liveError ? ('blad odpytywania API: ' + L.liveError) : '';
+    var src = L.source === 'api' ? 'API' : t('srcFile');
+    el.textContent = t('limitsAgo', age, src);
+    el.title = L.liveError ? (t('apiErr') + L.liveError) : '';
     el.className = 'badge' + (L.liveError ? ' warn' : (sec > 5400 ? ' warn' : ''));
   }
 
-  var waiting = (s.alerts || []).filter(function(a){ return a.state === 'czeka'; });
+  // JEDNO zrodlo prawdy o "czeka" - stany sesji (tak samo jak na ekranie)
+  var waiting = ses.filter(function(x){ return x.state === 'czeka'; });
   var box = document.getElementById('alert');
   if (waiting.length){
     box.className = 'alert on';
     document.getElementById('alertTxt').textContent =
-      waiting.length > 1 ? waiting.length + ' sesje czekają na Ciebie' : 'Claude czeka na Twoją odpowiedź';
-    document.getElementById('alertSub').textContent =
-      waiting[0].cwd + (waiting[0].message ? ' · ' + waiting[0].message.slice(0,80) : '');
+      waiting.length > 1 ? t('waitN', waiting.length) : t('wait1');
+    document.getElementById('alertSub').textContent = esc(waiting[0].title || '');
   } else box.className = 'alert';
 
   document.getElementById('clock').textContent =
-    new Date(s.now).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+    new Date(s.now).toLocaleTimeString(t('locale'),{hour:'2-digit',minute:'2-digit'});
 }
 
 var lastOk = 0;
@@ -383,7 +452,7 @@ function tick(){
     .then(function(s){ lastOk = Date.now(); render(s); })
     .catch(function(){
       var el = document.getElementById('fresh');
-      el.textContent = 'serwer nie odpowiada'; el.className = 'badge bad';
+      el.textContent = t('serverDown'); el.className = 'badge bad';
     });
 }
 
@@ -392,12 +461,11 @@ setInterval(function(){
   var since = Date.now() - lastOk;
   document.body.classList.toggle('stale', since > 10000);
   if (since > 10000){
-    document.getElementById('frozenP').textContent =
-      'brak kontaktu z serwerem od ' + Math.round(since/1000) +
-      ' s — pokazane liczby są nieaktualne. Uruchom start.bat.';
+    document.getElementById('frozenP').textContent = t('frozenP', Math.round(since/1000));
   }
 }, 1000);
 
+applyLang();
 tick();
 setInterval(tick, 2000);
 </script>

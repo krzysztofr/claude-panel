@@ -24,6 +24,27 @@ import urllib.request
 from collections import deque
 from datetime import datetime, timezone
 
+# ---------------------------------------------------------------- jezyk
+LANGS = {
+    "pl": {
+        "limit5h": "LIMIT 5H", "weekly": "TYDZIEN", "sessions": "SESJE",
+        "wait1": "CLAUDE CZEKA NA CIEBIE", "waitN": "%d SESJE CZEKAJA",
+        "none": "nic nie pracuje", "more": "+%d dalszych", "na": "brak",
+        "tok5": "tokeny out / 5h", "tok7": "%s out / 7 dni",
+        "reset_now": "reset lada moment", "reset_dh": "reset za %dd %dh",
+        "reset_hm": "reset za %dh %02dm", "reset_m": "reset za %d min",
+    },
+    "en": {
+        "limit5h": "5H LIMIT", "weekly": "WEEKLY", "sessions": "SESSIONS",
+        "wait1": "CLAUDE IS WAITING FOR YOU", "waitN": "%d SESSIONS WAITING",
+        "none": "nothing running", "more": "+%d more", "na": "n/a",
+        "tok5": "out tokens / 5h", "tok7": "%s out / 7 days",
+        "reset_now": "resets any moment", "reset_dh": "resets in %dd %dh",
+        "reset_hm": "resets in %dh %02dm", "reset_m": "resets in %d min",
+    },
+}
+T = LANGS["pl"]   # ustawiane w main() z --lang / PANEL_LANG
+
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 # 127.0.0.1, NIE "localhost": Windows dla localhost probuje najpierw IPv6
@@ -100,13 +121,13 @@ def until(iso):
         return ""
     diff = (d - datetime.now(timezone.utc)).total_seconds()
     if diff <= 0:
-        return "reset lada moment"
+        return T["reset_now"]
     h, m = int(diff // 3600), int(diff % 3600 // 60)
     if h >= 24:
-        return "reset za %dd %dh" % (h // 24, h % 24)
+        return T["reset_dh"] % (h // 24, h % 24)
     if h:
-        return "reset za %dh %02dm" % (h, m)
-    return "reset za %d min" % m
+        return T["reset_hm"] % (h, m)
+    return T["reset_m"] % m
 
 
 def bar(d, x, y, w, h, pct, col):
@@ -124,7 +145,7 @@ def block(d, y, h, label, lim, col_override=None):
     pasek u dolu."""
     if not lim or lim.get("percent") is None:
         d.text((14, y + 6), label, font=f_label, fill=DIM)
-        d.text((W - 14, y + 6), "brak", font=f_small, fill=DIM, anchor="ra")
+        d.text((W - 14, y + 6), T["na"], font=f_small, fill=DIM, anchor="ra")
         return
     pct = lim["percent"]
     col = col_override or color_for(pct)
@@ -201,7 +222,7 @@ def draw(s, phase=True):
     # ---- alert: Claude czeka na odpowiedz ----
     if waiting:
         d.rounded_rectangle([10, y, W - 10, y + 38], radius=8, fill=(14, 34, 48), outline=WAIT)
-        msg = "%d SESJE CZEKAJA" % len(waiting) if len(waiting) > 1 else "CLAUDE CZEKA NA CIEBIE"
+        msg = T["waitN"] % len(waiting) if len(waiting) > 1 else T["wait1"]
         d.text((W // 2, y + 19), msg, font=f_mid, fill=(190, 230, 253), anchor="mm")
         y += 46
 
@@ -209,8 +230,8 @@ def draw(s, phase=True):
     sc = lim.get("scoped")
     sc_name = ((sc or {}).get("name") or "model").upper()
     worst = None
-    for name, l in (("LIMIT 5H", lim.get("session")),
-                    ("TYDZIEN", lim.get("weekly")),
+    for name, l in ((T["limit5h"], lim.get("session")),
+                    (T["weekly"], lim.get("weekly")),
                     (sc_name, sc)):
         if l and l.get("percent") is not None:
             if l.get("severity") == "critical" or l["percent"] >= 85:
@@ -230,14 +251,14 @@ def draw(s, phase=True):
     need_sess = 26 + 2 * SESS_ROW_H
     blk = max(50, min(58, (foot_y - y - need_sess) // 3))
 
-    block(d, y, blk, "LIMIT 5H", lim.get("session"));      y += blk
-    block(d, y, blk, "TYDZIEN",  lim.get("weekly"), ACC);  y += blk
-    block(d, y, blk, sc_name,    sc, FABLE);               y += blk
+    block(d, y, blk, T["limit5h"], lim.get("session"));    y += blk
+    block(d, y, blk, T["weekly"],  lim.get("weekly"), ACC); y += blk
+    block(d, y, blk, sc_name,      sc, FABLE);             y += blk
 
     # ---- sesje: zabieraja wszystko az do stopki ----
     ses = s.get("sessions") or []
     d.line([(14, y + 2), (W - 14, y + 2)], fill=LINE, width=1)
-    d.text((14, y + 8), "SESJE", font=f_tiny, fill=DIM)
+    d.text((14, y + 8), T["sessions"], font=f_tiny, fill=DIM)
     d.text((W - 14, y + 8), "%d / %d" % (len(ses), s.get("processes", 0)),
            font=f_tiny, fill=DIM, anchor="ra")
     y += 26
@@ -270,9 +291,9 @@ def draw(s, phase=True):
         y += SESS_ROW_H
 
     if not ses:
-        d.text((14, y + 4), "nic nie pracuje", font=f_small, fill=DIM)
+        d.text((14, y + 4), T["none"], font=f_small, fill=DIM)
     elif len(ses) > len(shown):
-        d.text((38, y + 4), "+%d dalszych" % (len(ses) - len(shown)),
+        d.text((38, y + 4), T["more"] % (len(ses) - len(shown)),
                font=f_tiny, fill=DIM)
 
     # ---- stopka: tokeny ----
@@ -284,9 +305,9 @@ def draw(s, phase=True):
 
     d.line([(14, foot_y), (W - 14, foot_y)], fill=LINE, width=1)
     fy = foot_y + 12
-    footer_row(d, fy, "tokeny out / 5h", fmt(w5.get("out")))
+    footer_row(d, fy, T["tok5"], fmt(w5.get("out")))
     fy += FOOTER_ROW_H
-    footer_row(d, fy, "%s out / 7 dni" % sc_disp, fmt(sc_tok), FABLE)
+    footer_row(d, fy, T["tok7"] % sc_disp, fmt(sc_tok), FABLE)
 
     global LAST_DOTS
     LAST_DOTS = dots
@@ -645,7 +666,13 @@ def main():
     ap.add_argument("--blink", type=float, default=0.6, help="polokres migania kropek")
     ap.add_argument("--tick", type=float, default=0.15, help="krok animacji stworka")
     ap.add_argument("--brightness", type=int, default=80)
+    ap.add_argument("--lang", choices=sorted(LANGS),
+                    default=os.environ.get("PANEL_LANG", "pl"),
+                    help="jezyk napisow na ekranie / screen language")
     args = ap.parse_args()
+
+    global T
+    T = LANGS.get(args.lang, LANGS["pl"])
 
     screen = None
     if args.serial:

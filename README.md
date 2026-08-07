@@ -9,8 +9,10 @@ walks (then runs, kicking up dust) as your token burn rate rises, sweats when
 a limit passes 85%, and flashes a blue "!" bubble when a session is waiting
 for your decision.
 
-> UI language is Polish. Docs in Polish: [docs/README.pl.md](docs/README.pl.md)
-> (includes the full list of hardware gotchas we hit while building this).
+> UI is switchable **English/Polish** — a PL/EN toggle in the browser
+> dashboard, `--lang en` for the screen. Docs in Polish:
+> [docs/README.pl.md](docs/README.pl.md) (includes the full list of hardware
+> gotchas we hit while building this).
 
 <p align="center"><img src="docs/screenshot.png" width="320" alt="Claude Panel on the 3.5-inch screen (demo data)"></p>
 
@@ -82,7 +84,11 @@ screen's command parser; the loop resyncs on reconnect, but the flag is clean).
 | `PANEL_NO_API` | – | set `1` to skip the API and rely on Claude Code's cached limits only |
 
 `render.py` flags: `--serial AUTO|COMx`, `--interval` (data refresh, s),
-`--tick` (mascot animation step, s), `--brightness 0-100`.
+`--tick` (mascot animation step, s), `--brightness 0-100`,
+`--lang pl|en` (screen language, also via `PANEL_LANG`).
+
+The browser dashboard has its own PL/EN toggle in the header (persisted in
+localStorage).
 
 ## "Waiting for you" alerts (optional)
 
