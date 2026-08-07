@@ -53,7 +53,23 @@ and open `http://127.0.0.1:4747`.
 - Python 3.10+ with `Pillow` and `pyserial`:
   `pip install Pillow pyserial`
 
-## Quick start
+## Install
+
+```bat
+git clone https://github.com/KonradLe/claude-panel.git
+cd claude-panel
+install.bat
+```
+
+`install.bat` checks Node/Python, installs the two Python packages, offers to
+add the panel to Windows autostart and starts it. That's the whole setup.
+
+**The USB screen can be plugged in at any time** — before or after install.
+It's auto-detected by its hardware signature and reconnects by itself after
+being unplugged (the loop retries in the background). The browser dashboard
+works without the screen at all.
+
+## Manual start
 
 ```bat
 :: 1. data server + browser dashboard
@@ -66,9 +82,10 @@ python render.py --serial AUTO
 
 ### Autostart (Windows)
 
-Create a shortcut to `panel-start.vbs` in `shell:startup`. It launches both
-supervisor scripts (`run-server.bat`, `run-screen.bat`) hidden; each restarts
-its process 5 s after a crash.
+`install.bat` sets this up for you. By hand: create a shortcut to
+`panel-start.vbs` in `shell:startup`. It launches both supervisor scripts
+(`run-server.bat`, `run-screen.bat`) hidden; each restarts its process 5 s
+after a crash.
 
 **To stop the screen loop, create a `stop.flag` file in the project folder** —
 never kill the python process mid-transmission (a hard kill can desync the
