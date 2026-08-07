@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Panel — zużycie</title>
+<style>
+  :root{
+    --bg:#07090d; --panel:#0e131b; --panel2:#111823; --line:#1c2530;
+    --dim:#5d6b7d; --txt:#dfe7f0;
+    --ok:#22d3a7; --warn:#f5b23d; --hot:#ff4d5e; --acc:#7aa2ff; --fable:#c084fc;
+    --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--txt);min-height:100vh;
+    font-family:"Segoe UI Variable Display","Segoe UI",Inter,system-ui,sans-serif;
+    font-variant-numeric:tabular-nums;padding:18px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .muted{color:var(--dim)}
+
+  /* ---------- nagłówek ---------- */
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand{font-size:19px;font-weight:800;letter-spacing:.16em;color:var(--acc)}
+  .who{font-size:14px;color:var(--dim)}
+  .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .badge{
+    font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;
+    border:1px solid var(--line);color:var(--dim);white-space:nowrap;
+  }
+  .badge.warn{color:var(--warn);border-color:rgba(245,178,61,.45)}
+  .badge.bad{color:var(--hot);border-color:rgba(255,77,94,.5)}
+  .clock{font-size:20px;font-weight:700;color:var(--dim)}
+
+  /* ---------- alert ---------- */
+  .alert{
+    display:none;align-items:center;gap:14px;padding:14px 18px;border-radius:var(--r);
+    background:linear-gradient(90deg,rgba(255,77,94,.2),rgba(255,77,94,.03));
+    border:1px solid rgba(255,77,94,.5);animation:pulse 1.7s ease-in-out infinite;
+  }
+  .alert.on{display:flex}
+  .alert .dot{width:11px;height:11px;border-radius:50%;background:var(--hot);flex:0 0 auto}
+  .alert .t{font-size:17px;font-weight:700;color:#ffd9dd}
+  .alert .s{margin-left:auto;font-size:13px;color:#ff9aa4}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+  /* ---------- kafle ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  .card h2{
+    font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--dim);
+    margin-bottom:12px;text-transform:uppercase;
+  }
+
+  .gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .g{display:flex;align-items:center;gap:16px}
+  .ring{position:relative;width:104px;height:104px;flex:0 0 auto}
+  .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring .v{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+           font-size:27px;font-weight:800}
+  .ginfo .name{font-size:14px;font-weight:700;letter-spacing:.06em}
+  .ginfo .reset{font-size:12.5px;color:var(--dim);margin-top:5px}
+  .ginfo .sev{font-size:11px;margin-top:7px;font-weight:600}
+
+  /* ---------- liczby ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat .k{font-size:11px;letter-spacing:.12em;color:var(--dim);font-weight:700}
+  .stat .v{font-size:26px;font-weight:800;margin-top:5px;line-height:1.1}
+  .stat .s{font-size:12px;color:var(--dim);margin-top:3px;
+           overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* ---------- wykres ---------- */
+  .chart{display:flex;align-items:flex-end;gap:3px;height:130px}
+  .chart .b{
+    flex:1;background:linear-gradient(180deg,var(--acc),rgba(122,162,255,.28));
+    border-radius:3px 3px 0 0;min-height:2px;position:relative;transition:height .3s;
+  }
+  .chart .b.now{background:linear-gradient(180deg,var(--ok),rgba(34,211,167,.3))}
+  .axis{display:flex;gap:3px;margin-top:7px}
+  .axis span{flex:1;font-size:10px;color:var(--dim);text-align:center;
+             overflow:hidden;white-space:nowrap}
+
+  /* ---------- listy ---------- */
+  .two{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .rowline{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(28,37,48,.6)}
+  .rowline:last-child{border-bottom:none}
+  .rowline .n{font-size:13.5px;min-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rowline .track{flex:1;height:7px;border-radius:4px;background:#182130;overflow:hidden}
+  .rowline .fill{height:100%;border-radius:4px;background:var(--acc)}
+  .rowline .num{font-size:13px;font-weight:700;min-width:62px;text-align:right}
+  .empty{font-size:13px;color:var(--dim);padding:8px 0}
+
+  .tag{
+    font-size:10.5px;font-weight:700;letter-spacing:.05em;padding:3px 8px;border-radius:999px;
+    background:#182130;color:var(--dim);white-space:nowrap;flex:0 0 auto;
+  }
+  .tag.own{background:rgba(34,211,167,.14);color:var(--ok)}
+
+  .live{display:inline-block;width:8px;height:8px;border-radius:50%;
+        background:var(--ok);margin-right:8px;animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+  /* Zamrozone dane: gdy stracimy kontakt z serwerem, liczby MUSZA wygladac
+     na martwe. Zostawienie ich zywych to panel, ktory klamie. */
+  #frozen{
+    display:none;position:fixed;inset:0;z-index:99;
+    background:rgba(7,9,13,.82);backdrop-filter:blur(2px);
+    align-items:center;justify-content:center;flex-direction:column;gap:10px;
+  }
+  body.stale #frozen{display:flex}
+  #frozen .h{font-size:26px;font-weight:800;color:var(--hot)}
+  #frozen .p{font-size:14px;color:var(--dim)}
+
+  /* Limit na czerwonym poziomie - ma byc widoczny z drugiego konca pokoju. */
+  .critical{
+    display:none;align-items:center;gap:12px;padding:13px 18px;border-radius:var(--r);
+    background:linear-gradient(90deg,rgba(255,77,94,.26),rgba(255,77,94,.05));
+    border:1px solid rgba(255,77,94,.6);
+  }
+  .critical.on{display:flex}
+  .critical .t{font-size:16px;font-weight:800;color:#ffd9dd;letter-spacing:.02em}
+  .critical .s{margin-left:auto;font-size:13px;color:#ff9aa4}
+
+  @media(max-width:900px){
+    .gauges,.stats,.two{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">CLAUDE PANEL</span>
+  <span class="who" id="who"></span>
+  <span class="right">
+    <span class="badge" id="fresh">—</span>
+    <span class="clock" id="clock">--:--</span>
+  </span>
+</header>
+
+<div id="frozen">
+  <div class="h">DANE ZAMROŻONE</div>
+  <div class="p" id="frozenP">brak kontaktu z serwerem — pokazane liczby są nieaktualne</div>
+</div>
+
+<div class="critical" id="crit">
+  <span class="t" id="critTxt"></span>
+  <span class="s" id="critSub"></span>
+</div>
+
+<div class="alert" id="alert">
+  <span class="dot"></span>
+  <span class="t" id="alertTxt">Claude czeka na Twoją odpowiedź</span>
+  <span class="s" id="alertSub"></span>
+</div>
+
+<div class="gauges">
+  <div class="card g">
+    <div class="ring">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="none" stroke="#182130" stroke-width="11"/>
+        <circle id="a5" cx="50" cy="50" r="43" fill="none" stroke="var(--ok)" stroke-width="11"
+                stroke-linecap="round" stroke-dasharray="270" stroke-dashoffset="270"/></svg>
+      <div class="v" id="v5">–</div>
+    </div>
+    <div class="ginfo"><div class="name">LIMIT 5H</div><div class="reset" id="r5">—</div>
+      <div class="sev" id="s5"></div></div>
+  </div>
+
+  <div class="card g">
+    <div class="ring">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="none" stroke="#182130" stroke-width="11"/>
+        <circle id="aW" cx="50" cy="50" r="43" fill="none" stroke="var(--acc)" stroke-width="11"
+                stroke-linecap="round" stroke-dasharray="270" stroke-dashoffset="270"/></svg>
+      <div class="v" id="vW">–</div>
+    </div>
+    <div class="ginfo"><div class="name">TYDZIEŃ — ŁĄCZNIE</div><div class="reset" id="rW">—</div>
+      <div class="sev" id="sW"></div></div>
+  </div>
+
+  <div class="card g">
+    <div class="ring">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="none" stroke="#182130" stroke-width="11"/>
+        <circle id="aF" cx="50" cy="50" r="43" fill="none" stroke="var(--fable)" stroke-width="11"
+                stroke-linecap="round" stroke-dasharray="270" stroke-dashoffset="270"/></svg>
+      <div class="v" id="vF">–</div>
+    </div>
+    <div class="ginfo"><div class="name" id="nF">TYDZIEŃ — MODEL</div><div class="reset" id="rF">—</div>
+      <div class="sev" id="sF"></div></div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="card stat"><div class="k">OUT / OKNO 5H</div><div class="v" id="o5">–</div><div class="s" id="o5s">&nbsp;</div></div>
+  <div class="card stat"><div class="k">OUT / DZIŚ</div><div class="v" id="od">–</div><div class="s" id="ods">&nbsp;</div></div>
+  <div class="card stat"><div class="k">OUT / 7 DNI</div><div class="v" id="o7">–</div><div class="s" id="o7s">&nbsp;</div></div>
+  <div class="card stat"><div class="k">SESJE</div><div class="v" id="ses">–</div><div class="s" id="sesS">&nbsp;</div></div>
+</div>
+
+<div class="card">
+  <h2>Tokeny wyjściowe — ostatnie 24 h</h2>
+  <div class="chart" id="chart"></div>
+  <div class="axis" id="axis"></div>
+</div>
+
+<div class="two">
+  <div class="card"><h2>Modele — 7 dni</h2><div id="models"></div></div>
+  <div class="card"><h2>Projekty — 7 dni</h2><div id="projects"></div></div>
+  <div class="card"><h2>Kto zużywa — 7 dni</h2><div id="split"></div></div>
+</div>
+
+<div class="card"><h2>Aktywne sesje</h2><div id="sessions"></div></div>
+
+<script>
+var C = 2 * Math.PI * 43;
+
+// Tytuly sesji pochodza z tekstu uzytkownika/modelu i ladują do innerHTML.
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+function fmt(n){
+  if (n == null) return '–';
+  if (n >= 1e6) return (n/1e6).toFixed(2) + ' M';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + ' k';
+  return String(Math.round(n));
+}
+function colorFor(p){ return p >= 85 ? 'var(--hot)' : p >= 60 ? 'var(--warn)' : 'var(--ok)'; }
+
+function until(iso){
+  if (!iso) return '—';
+  var d = new Date(iso); if (isNaN(d)) return '—';
+  var diff = d - Date.now();
+  if (diff <= 0) return 'reset lada moment';
+  var h = Math.floor(diff/3600000), m = Math.floor(diff%3600000/60000);
+  if (h >= 24) return 'reset za ' + Math.floor(h/24) + ' d ' + (h%24) + ' h';
+  if (h) return 'reset za ' + h + ' h ' + m + ' min';
+  return 'reset za ' + m + ' min';
+}
+
+function gauge(arcId, valId, resId, sevId, lim, color){
+  var arc = document.getElementById(arcId), val = document.getElementById(valId),
+      res = document.getElementById(resId), sev = document.getElementById(sevId);
+  if (!lim || lim.percent == null){
+    val.textContent = '–'; res.textContent = 'brak danych';
+    arc.setAttribute('stroke-dashoffset', C); sev.textContent = ''; return;
+  }
+  var p = Math.max(0, Math.min(100, lim.percent));
+  var col = color || colorFor(p);
+  arc.setAttribute('stroke-dashoffset', C * (1 - p/100));
+  arc.setAttribute('stroke', col);
+  val.textContent = p + '%'; val.style.color = col;
+  res.textContent = until(lim.resetsAt);
+  if (lim.severity && lim.severity !== 'normal'){
+    sev.textContent = '⚠ ' + lim.severity; sev.style.color = 'var(--warn)';
+  } else sev.textContent = '';
+}
+
+function bars(list, keyName, keyVal, colorVar){
+  if (!list.length) return '<div class="empty">brak danych</div>';
+  var max = Math.max.apply(null, list.map(function(x){ return x[keyVal]; })) || 1;
+  return list.map(function(x){
+    var w = Math.max(2, Math.round(x[keyVal] / max * 100));
+    return '<div class="rowline"><span class="n">' + x[keyName] + '</span>' +
+           '<span class="track"><span class="fill" style="width:' + w + '%;background:' + colorVar + '"></span></span>' +
+           '<span class="num">' + fmt(x[keyVal]) + '</span></div>';
+  }).join('');
+}
+
+function drawChart(hourly){
+  var max = Math.max.apply(null, hourly.map(function(h){ return h.out; })) || 1;
+  var last = hourly.length - 1;
+  document.getElementById('chart').innerHTML = hourly.map(function(h, i){
+    var pct = Math.max(1, Math.round(h.out / max * 100));
+    var d = new Date(h.t);
+    return '<div class="b' + (i === last ? ' now' : '') + '" style="height:' + pct + '%" title="' +
+           d.getHours() + ':00 — ' + fmt(h.out) + ' out, ' + h.msgs + ' odp."></div>';
+  }).join('');
+  document.getElementById('axis').innerHTML = hourly.map(function(h, i){
+    var d = new Date(h.t);
+    return '<span>' + (i % 4 === 0 ? d.getHours() + ':00' : '') + '</span>';
+  }).join('');
+}
+
+function render(s){
+  var L = s.limits || {};
+  var scName = ((L.scoped && L.scoped.name) || 'model').toUpperCase();
+  gauge('a5','v5','r5','s5', L.session, null);
+  gauge('aW','vW','rW','sW', L.weekly, 'var(--acc)');
+  gauge('aF','vF','rF','sF', L.scoped, 'var(--fable)');
+  document.getElementById('nF').textContent = 'TYDZIEŃ — ' + scName;
+
+  // Pasek krytyczny - bierze najgorszy z trzech limitow.
+  var crit = null;
+  [['LIMIT 5H', L.session], ['LIMIT TYGODNIOWY', L.weekly], [scName, L.scoped]].forEach(function(p){
+    var l = p[1];
+    if (!l || l.percent == null) return;
+    if (l.severity === 'critical' || l.percent >= 85){
+      if (!crit || l.percent > crit.p) crit = { n:p[0], p:l.percent, r:l.resetsAt };
+    }
+  });
+  var cb = document.getElementById('crit');
+  if (crit){
+    cb.className = 'critical on';
+    document.getElementById('critTxt').textContent = '⚠ ' + crit.n + ' — ' + crit.p + '% wykorzystane';
+    document.getElementById('critSub').textContent = until(crit.r);
+  } else cb.className = 'critical';
+
+  document.getElementById('who').textContent =
+    (L.who ? L.who + ' · ' : '') + (L.plan ? L.plan.replace('default_claude_','').replace(/_/g,' ') : '');
+
+  var w5 = s.window5h || {}, w7 = s.window7d || {}, td = s.today || {};
+  document.getElementById('o5').textContent = fmt(w5.out);
+  document.getElementById('o5s').textContent = (w5.msgs||0) + ' odpowiedzi · z cache ' + fmt(w5.total);
+  document.getElementById('od').textContent = fmt(td.out);
+  document.getElementById('ods').textContent = (td.msgs||0) + ' odpowiedzi';
+  document.getElementById('o7').textContent = fmt(w7.out);
+  document.getElementById('o7s').textContent = (w7.msgs||0) + ' odpowiedzi';
+
+  var ses = s.sessions || [];
+  document.getElementById('ses').textContent = ses.length + ' / ' + s.processes;
+  document.getElementById('sesS').textContent = 'aktywne / procesy claude.exe';
+
+  drawChart(s.hourly || []);
+
+  var mods = [];
+  for (var k in (w7.models || {})) mods.push({ name:k, out:w7.models[k].out });
+  mods.sort(function(a,b){ return b.out - a.out; });
+  document.getElementById('models').innerHTML = bars(mods, 'name', 'out', 'var(--fable)');
+  document.getElementById('projects').innerHTML = bars(s.projects || [], 'name', 'out', 'var(--acc)');
+  document.getElementById('split').innerHTML = bars(s.split || [], 'name', 'out', 'var(--ok)');
+
+  document.getElementById('sessions').innerHTML = ses.length
+    ? ses.map(function(x){
+        var kind = x.titleKind === 'wlasny' ? '<span class="tag own">twoja nazwa</span>'
+                 : x.titleKind === 'ai'     ? '<span class="tag">auto</span>'
+                 : x.titleKind === 'prompt' ? '<span class="tag">z promptu</span>' : '';
+        var ag = x.agents ? '<span class="tag">' + x.agents + ' agentów</span>' : '';
+        return '<div class="rowline"><span class="live"></span>' +
+               '<span class="n" style="min-width:300px;flex:1">' + esc(x.title) + '</span>' +
+               kind + ag +
+               '<span class="muted" style="font-size:12px">' + x.project + '</span>' +
+               '<span class="num">' + Math.round(x.idleMs/1000) + ' s</span></div>';
+      }).join('')
+    : '<div class="empty">nic teraz nie pracuje</div>';
+
+  var el = document.getElementById('fresh');
+  if (L.ageMs == null){ el.textContent = 'brak limitów'; el.className = 'badge bad'; }
+  else {
+    var sec = Math.round(L.ageMs/1000);
+    var age = sec < 90 ? sec + ' s'
+            : sec < 5400 ? Math.round(sec/60) + ' min'
+            : (sec/3600).toFixed(1) + ' h';
+    // zrodlo: 'api' = odpytujemy sami co 2 min, 'plik' = czekamy na Claude Code
+    var src = L.source === 'api' ? 'API' : 'plik';
+    el.textContent = 'limity: ' + age + ' temu · ' + src;
+    el.title = L.liveError ? ('blad odpytywania API: ' + L.liveError) : '';
+    el.className = 'badge' + (L.liveError ? ' warn' : (sec > 5400 ? ' warn' : ''));
+  }
+
+  var waiting = (s.alerts || []).filter(function(a){ return a.state === 'czeka'; });
+  var box = document.getElementById('alert');
+  if (waiting.length){
+    box.className = 'alert on';
+    document.getElementById('alertTxt').textContent =
+      waiting.length > 1 ? waiting.length + ' sesje czekają na Ciebie' : 'Claude czeka na Twoją odpowiedź';
+    document.getElementById('alertSub').textContent =
+      waiting[0].cwd + (waiting[0].message ? ' · ' + waiting[0].message.slice(0,80) : '');
+  } else box.className = 'alert';
+
+  document.getElementById('clock').textContent =
+    new Date(s.now).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+}
+
+var lastOk = 0;
+
+function tick(){
+  fetch('/api/state',{cache:'no-store'})
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(s){ lastOk = Date.now(); render(s); })
+    .catch(function(){
+      var el = document.getElementById('fresh');
+      el.textContent = 'serwer nie odpowiada'; el.className = 'badge bad';
+    });
+}
+
+// Straznik swiezosci - niezalezny od powodzenia fetcha.
+setInterval(function(){
+  var since = Date.now() - lastOk;
+  document.body.classList.toggle('stale', since > 10000);
+  if (since > 10000){
+    document.getElementById('frozenP').textContent =
+      'brak kontaktu z serwerem od ' + Math.round(since/1000) +
+      ' s — pokazane liczby są nieaktualne. Uruchom start.bat.';
+  }
+}, 1000);
+
+tick();
+setInterval(tick, 2000);
+</script>
+</body>
+</html>
