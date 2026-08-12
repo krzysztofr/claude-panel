@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# /// script
+# dependencies = ["pillow", "pyserial"]
+# ///
 """
 Renderer panelu Claude pod Turing Smart Screen 3.5" (320x480, pion).
 
@@ -76,11 +79,23 @@ MASCOT_ZONE = (6, 2, 208, 40)
 STOP_FLAG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stop.flag")
 
 
+# Segoe jest tylko na Windows - na macOS bierzemy odpowiednik z Arial
+# (Supplemental sa w systemie od zawsze, bez instalowania czegokolwiek).
+MAC_FONTS = {
+    "segoeuib.ttf": "Arial Bold.ttf",
+    "seguisb.ttf": "Arial Bold.ttf",
+    "segoeui.ttf": "Arial.ttf",
+}
+
+
 def font(name, size):
-    try:
-        return ImageFont.truetype("C:/Windows/Fonts/" + name, size)
-    except OSError:
-        return ImageFont.load_default()
+    for p in ("C:/Windows/Fonts/" + name,
+              "/System/Library/Fonts/Supplemental/" + MAC_FONTS.get(name, name)):
+        try:
+            return ImageFont.truetype(p, size)
+        except OSError:
+            continue
+    return ImageFont.load_default()
 
 
 f_brand = font("segoeuib.ttf", 23)

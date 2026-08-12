@@ -54,9 +54,10 @@ Każdy klon `1A86:5722` zadziała tak samo.)*
 | `public/index.html` | dashboard w przeglądarce |
 | `render.py` | rysuje klatkę 320×480 i wysyła na ekran |
 | `turing.py` | sterownik ekranu + wykrywanie portu |
-| `run-server.bat` / `run-screen.bat` | nadzorcy — restartują proces po awarii |
-| `panel-start.vbs` | uruchamia oba bez okien konsoli |
-| `start.bat` | ręczne odpalenie samego serwera |
+| `run-server.bat` / `run-screen.bat` | (Windows) nadzorcy — restartują proces po awarii |
+| `panel-start.vbs` | (Windows) uruchamia oba bez okien konsoli |
+| `start.bat` | (Windows) ręczne odpalenie samego serwera |
+| `install.sh` / `start.sh` / `run-*.sh` | (macOS) instalator, ręczny start i skrypty startowe dla launchd |
 | `usage-cache.json` | ostatni udany odczyt limitów (tworzony automatycznie) |
 | `logs/` | logi serwera i ekranu, czyszczone przy starcie |
 
@@ -132,6 +133,12 @@ proces w pętli i podnosi go po 5 sekundach, gdyby padł.
 
 Zatrzymanie: usuń skrót z Autostartu i ubij procesy (`node`, `python`
 i dwa `cmd`).
+
+Na macOS autostart robi `install.sh`: dwa agenty launchd
+(`com.claude-panel.server` / `.screen` w `~/Library/LaunchAgents`)
+z `KeepAlive` — launchd sam podnosi proces 5 s po awarii, logi w `logs/`.
+Zatrzymanie: `launchctl unload ~/Library/LaunchAgents/com.claude-panel.*.plist`
+i usunięcie plists.
 
 ---
 

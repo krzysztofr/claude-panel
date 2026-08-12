@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# /// script
+# dependencies = ["pillow", "pyserial"]
+# ///
 """
 Sterownik ekranu Turing Smart Screen 3.5" (rewizja A) po porcie szeregowym.
 Protokol wg mathoudebine/turing-smart-screen-python (MIT).
@@ -38,11 +41,18 @@ def auto_detect():
         from serial.tools import list_ports
     except ImportError:
         return None
+    found = None
     for p in list_ports.comports():
         hw = ((p.hwid or "") + " " + (p.description or "")).upper()
-        if "USB35INCHIPSV2" in hw or ("VID_1A86" in hw and "PID_5722" in hw):
-            return p.device
-    return None
+        # Windows zapisuje id jako VID_1A86&PID_5722, macOS/Linux jako
+        # VID:PID=1A86:5722 - sprawdzamy oba formaty.
+        if "USB35INCHIPSV2" in hw or ("VID_1A86" in hw and "PID_5722" in hw) \
+                or "1A86:5722" in hw:
+            # macOS wystawia to samo urzadzenie jako /dev/tty.* i /dev/cu.*;
+            # tty.* blokuje open() na sygnale DCD, wiec preferujemy cu.*.
+            if found is None or p.device.startswith("/dev/cu."):
+                found = p.device
+    return found
 
 
 class Turing:

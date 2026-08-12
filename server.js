@@ -264,8 +264,8 @@ function ingest(file) {
 function decodeProject(filePath) {
   const rel = path.relative(PROJECTS, filePath);
   const top = rel.split(path.sep)[0] || '';
-  let s = top.replace(/^[A-Za-z]--/, '')        // "c--"          -> ""
-             .replace(/^Users-[^-]+-?/, '');    // "Users-<nazwa>-" -> ""
+  let s = top.replace(/^[A-Za-z]--/, '')        // Windows: "c--"            -> ""
+             .replace(/^-?Users-[^-]+-?/, '');  // "(-)Users-<nazwa>-" -> "" (macOS ma wiodacy "-")
   return s ? s.replace(/-/g, ' ') : 'katalog domowy';
 }
 
@@ -328,10 +328,17 @@ function refresh() {
 }
 
 function countProcesses() {
-  execFile('tasklist', ['/FI', 'IMAGENAME eq claude.exe', '/FO', 'CSV', '/NH'], { windowsHide: true }, (err, stdout) => {
-    if (err) return;
-    procCount = (stdout.match(/^"claude\.exe"/gim) || []).length;
-  });
+  if (process.platform === 'win32') {
+    execFile('tasklist', ['/FI', 'IMAGENAME eq claude.exe', '/FO', 'CSV', '/NH'], { windowsHide: true }, (err, stdout) => {
+      if (err) return;
+      procCount = (stdout.match(/^"claude\.exe"/gim) || []).length;
+    });
+  } else {
+    execFile('pgrep', ['-x', 'claude'], (err, stdout) => {
+      // pgrep konczy sie kodem 1, gdy nic nie znalazl - to nie blad
+      procCount = err ? 0 : stdout.split('\n').filter(Boolean).length;
+    });
+  }
 }
 
 // ---------------------------------------------------------------- agregacja

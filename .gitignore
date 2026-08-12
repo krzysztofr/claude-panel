@@ -9,3 +9,6 @@ stop.flag
 __pycache__/
 *.pyc
 *.err
+
+# lokalne pliki tymczasowe
+tmp/

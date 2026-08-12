@@ -50,14 +50,18 @@ and open `http://127.0.0.1:4747`.
 
 ## Requirements
 
-- Windows 10/11
+- Windows 10/11 or macOS
 - [Claude Code](https://claude.com/claude-code) installed and logged in
   (subscription/OAuth login; the limits gauges need `~/.claude/.credentials.json`)
 - Node.js 18+
-- Python 3.10+ with `Pillow` and `pyserial`:
-  `pip install Pillow pyserial`
+- Python: on Windows, Python 3.10+ with `Pillow` and `pyserial`
+  (`pip install Pillow pyserial`); on macOS, [uv](https://docs.astral.sh/uv/)
+  is enough — it resolves both packages automatically (plain `python3` + pip
+  works too)
 
 ## Install
+
+Windows:
 
 ```bat
 git clone https://github.com/KonradLe/claude-panel.git
@@ -65,8 +69,20 @@ cd claude-panel
 install.bat
 ```
 
-`install.bat` checks Node/Python, installs the two Python packages, offers to
-add the panel to Windows autostart and starts it. That's the whole setup.
+macOS:
+
+```sh
+git clone https://github.com/KonradLe/claude-panel.git
+cd claude-panel
+./install.sh
+```
+
+The installer checks Node/Python, installs the Python packages (skipped with
+uv), offers to add the panel to autostart (Windows Startup folder / macOS
+launchd) and starts it. That's the whole setup.
+
+On macOS the CH340 serial driver for the screen is built into the system —
+nothing extra to install.
 
 **The USB screen can be plugged in at any time** — before or after install.
 It's auto-detected by its hardware signature and reconnects by itself after
@@ -74,6 +90,8 @@ being unplugged (the loop retries in the background). The browser dashboard
 works without the screen at all.
 
 ## Manual start
+
+Windows:
 
 ```bat
 :: 1. data server + browser dashboard
@@ -84,12 +102,35 @@ node server.js
 python render.py --serial AUTO
 ```
 
+macOS (or `./start.sh` for both at once):
+
+```sh
+# 1. data server + browser dashboard
+node server.js
+# -> http://127.0.0.1:4747
+
+# 2. (optional) the USB screen, auto-detected by hardware signature
+uv run render.py --serial AUTO      # or: python3 render.py --serial AUTO
+```
+
 ### Autostart (Windows)
 
 `install.bat` sets this up for you. By hand: create a shortcut to
 `panel-start.vbs` in `shell:startup`. It launches both supervisor scripts
 (`run-server.bat`, `run-screen.bat`) hidden; each restarts its process 5 s
 after a crash.
+
+### Autostart (macOS)
+
+`install.sh` sets this up for you: two launchd agents
+(`com.claude-panel.server` / `com.claude-panel.screen` in
+`~/Library/LaunchAgents`) with `KeepAlive` — launchd itself restarts either
+process 5 s after a crash, logs land in `logs/`. Remove with:
+
+```sh
+launchctl unload ~/Library/LaunchAgents/com.claude-panel.*.plist
+rm ~/Library/LaunchAgents/com.claude-panel.*.plist
+```
 
 **To stop the screen loop, create a `stop.flag` file in the project folder** —
 never kill the python process mid-transmission (a hard kill can desync the
@@ -125,7 +166,7 @@ The blue state needs Claude Code hooks. Add to `~/.claude/settings.json`
 ```
 
 `-m 2` matters: if the panel is down, curl gives up after 2 s instead of
-blocking Claude Code.
+blocking Claude Code. On macOS/Linux use `curl` instead of `curl.exe`.
 
 ## How it works
 
