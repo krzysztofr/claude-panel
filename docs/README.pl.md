@@ -40,6 +40,10 @@ RGB565 little-endian. Protokół odtworzony z
 Numer portu **nie jest wpisany na sztywno** — `turing.auto_detect()` znajduje
 go po sygnaturze sprzętowej, więc zmiana COM po przelogowaniu USB nic nie psuje.
 
+👉 **Dokładnie ten ekran, którego używam, kupisz tu: https://temu.to/k/ezbo6d0qn7j**
+*(link afiliacyjny — dla Ciebie ta sama cena, dla mnie drobna prowizja.
+Każdy klon `1A86:5722` zadziała tak samo.)*
+
 ---
 
 ## Pliki

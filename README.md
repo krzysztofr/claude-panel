@@ -41,6 +41,10 @@ as a serial port, not a display — this project speaks its protocol directly
 (rev A, 320×480 portrait), based on
 [turing-smart-screen-python](https://github.com/mathoudebine/turing-smart-screen-python).
 
+👉 **The exact screen I use is this one on Temu: https://temu.to/k/ezbo6d0qn7j**
+*(affiliate link — same price for you, small kickback for me. Any `1A86:5722`
+clone works just as well.)*
+
 **No screen? The browser dashboard works on its own** — just run the server
 and open `http://127.0.0.1:4747`.
 
