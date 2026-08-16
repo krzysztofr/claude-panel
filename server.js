@@ -514,7 +514,10 @@ const server = http.createServer((req, res) => {
         const id = h.session_id || 'unknown';
         const ev = h.hook_event_name || 'unknown';
         alerts.set(id, {
-          state: ev === 'Notification' ? 'czeka' : ev === 'Stop' ? 'gotowe' : 'pracuje',
+          // SessionEnd: zamkniecie sesji w trakcie "czeka" nie zostawia
+          // banera na 30 min TTL - sesja konczy jako "gotowe".
+          state: ev === 'Notification' ? 'czeka'
+            : (ev === 'Stop' || ev === 'SessionEnd') ? 'gotowe' : 'pracuje',
           event: ev,
           cwd: h.cwd ? path.basename(h.cwd) : '',
           message: h.message || '',
