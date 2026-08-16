@@ -30,7 +30,7 @@ from datetime import datetime, timezone
 # ---------------------------------------------------------------- jezyk
 LANGS = {
     "pl": {
-        "limit5h": "LIMIT 5H", "weekly": "TYDZIEN", "sessions": "SESJE",
+        "limit5h": "Limit 5h", "weekly": "Tydzien", "sessions": "SESJE",
         "wait1": "CLAUDE CZEKA NA CIEBIE", "waitN": "%d SESJE CZEKAJA",
         "none": "nic nie pracuje", "more": "+%d dalszych", "na": "brak",
         "tok5": "tokeny out / 5h", "tok7": "%s out / 7 dni",
@@ -38,7 +38,7 @@ LANGS = {
         "reset_hm": "reset za %dh %02dm", "reset_m": "reset za %d min",
     },
     "en": {
-        "limit5h": "5H LIMIT", "weekly": "WEEKLY", "sessions": "SESSIONS",
+        "limit5h": "5h limit", "weekly": "Weekly", "sessions": "SESSIONS",
         "wait1": "CLAUDE IS WAITING FOR YOU", "waitN": "%d SESSIONS WAITING",
         "none": "nothing running", "more": "+%d more", "na": "n/a",
         "tok5": "out tokens / 5h", "tok7": "%s out / 7 days",
@@ -60,6 +60,8 @@ BG    = (7, 9, 13)
 LINE  = (28, 37, 48)
 DIM   = (93, 107, 125)
 TXT   = (223, 231, 240)
+LABEL = (165, 178, 195)  # naglowki limitow - cichsze niz dane
+SUB   = (135, 150, 170)  # "reset za..." - jasniej niz DIM, zeby dalo sie czytac
 OK    = (34, 211, 167)
 WARN  = (245, 178, 61)
 HOT   = (255, 77, 94)
@@ -164,11 +166,11 @@ def block(d, y, h, label, lim, col_override=None):
         return
     pct = lim["percent"]
     col = col_override or color_for(pct)
-    d.text((14, y + 2), label, font=f_label, fill=TXT)
+    d.text((14, y + 2), label, font=f_label, fill=LABEL)
     d.text((W - 14, y - 4), "%d%%" % pct, font=f_pct, fill=col, anchor="ra")
     t = until(lim.get("resetsAt"))
     if t:
-        d.text((14, y + 24), t, font=f_tiny, fill=DIM)
+        d.text((14, y + 24), t, font=f_tiny, fill=SUB)
     bar(d, 14, y + h - 14, W - 28, 11, pct, col)
 
 
@@ -242,7 +244,7 @@ def draw(s, phase=True):
 
     # ---- pasek krytyczny (najgorszy limit >=85%) ----
     sc = lim.get("scoped")
-    sc_name = ((sc or {}).get("name") or "model").upper()
+    sc_name = (sc or {}).get("name") or "model"
     worst = None
     for name, l in ((T["limit5h"], lim.get("session")),
                     (T["weekly"], lim.get("weekly")),
