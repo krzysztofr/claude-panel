@@ -170,7 +170,7 @@ def block(d, y, h, label, lim, col_override=None):
     d.text((W - 14, y - 4), "%d%%" % pct, font=f_pct, fill=col, anchor="ra")
     t = until(lim.get("resetsAt"))
     if t:
-        d.text((14, y + 24), t, font=f_tiny, fill=SUB)
+        d.text((14, y + 24), t, font=f_small, fill=SUB)
     bar(d, 14, y + h - 14, W - 28, 11, pct, col)
 
 
@@ -227,10 +227,9 @@ def draw(s, phase=True):
                    "%dmin" % (sec / 60) if sec < 5400 else "%.0fh" % (sec / 3600))
         age_col = WARN if (lim.get("liveError") or sec > 5400) else DIM
 
-    # ---- naglowek: strefa stworka + zegar ----
-    d.text((W - 14, 14), datetime.fromtimestamp(s["now"] / 1000).strftime("%H:%M"),
-           font=f_label, fill=DIM, anchor="ra")
-    d.text((W - 64, 17), age_txt, font=f_tiny, fill=age_col, anchor="ra")
+    # ---- naglowek: strefa stworka + wiek danych ----
+    # (zegar usuniety - miejsce zarezerwowane na cos ladniejszego)
+    d.text((W - 14, 14), age_txt, font=f_label, fill=age_col, anchor="ra")
     d.line([(14, 42), (W - 14, 42)], fill=LINE, width=1)
 
     y = 52
