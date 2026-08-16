@@ -471,6 +471,14 @@ function buildState() {
     projects: topProjects(weekStart, 6),
     split: splitMainAgents(weekStart),
     sessions: [...sessions.values()]
+      // Zamknieta na czysto sesja (SessionEnd) znika z listy od razu.
+      // Sesje otwarte-a-bezczynne maja ostatni event Stop/Notification,
+      // wiec zostaja; wznowienie (--resume) nadpisuje alert i wraca na liste.
+      // Twarde ubicie bez SessionEnd nadal wisi do progu ACTIVE_MS.
+      .filter(s => {
+        const a = alerts.get(s.sid);
+        return !(a && now - a.at < ALERT_TTL && a.event === 'SessionEnd');
+      })
       .map(s => {
         const a = alerts.get(s.sid);
         const fresh = a && now - a.at < ALERT_TTL;
