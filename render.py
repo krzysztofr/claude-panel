@@ -109,6 +109,14 @@ f_tiny  = font("segoeui.ttf", 13)
 f_sess  = font("seguisb.ttf", 17)   # nazwy sesji - najczesciej czytana rzecz
 f_sesst = font("segoeui.ttf", 14)   # czas przy sesji
 
+# Biale logo (RGBA) w prawym rogu naglowka; brak pliku = po prostu brak logo.
+try:
+    LOGO = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   "logo.png")).convert("RGBA")
+    LOGO.thumbnail((30, 30), Image.LANCZOS)
+except OSError:
+    LOGO = None
+
 
 def fetch():
     with urllib.request.urlopen(API, timeout=3) as r:
@@ -227,9 +235,12 @@ def draw(s, phase=True):
                    "%dmin" % (sec / 60) if sec < 5400 else "%.0fh" % (sec / 3600))
         age_col = WARN if (lim.get("liveError") or sec > 5400) else DIM
 
-    # ---- naglowek: strefa stworka + wiek danych ----
-    # (zegar usuniety - miejsce zarezerwowane na cos ladniejszego)
-    d.text((W - 14, 14), age_txt, font=f_label, fill=age_col, anchor="ra")
+    # ---- naglowek: strefa stworka + wiek danych + logo ----
+    rx = W - 14
+    if LOGO:
+        img.paste(LOGO, (rx - LOGO.width, 6), LOGO)
+        rx -= LOGO.width + 10
+    d.text((rx, 14), age_txt, font=f_label, fill=age_col, anchor="ra")
     d.line([(14, 42), (W - 14, 42)], fill=LINE, width=1)
 
     y = 52
