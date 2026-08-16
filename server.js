@@ -49,20 +49,42 @@ let backoffUntil = 0;
 let backoffMs = 0;
 const BACKOFF_MAX = 30 * 60 * 1000;
 
-// Odpytuje API o zuzycie. Token czytamy z pliku PRZY KAZDYM wywolaniu, zeby
-// samo podchwycic odswiezenie, gdy Claude Code go wymieni. Nigdzie go nie
-// kopiujemy, nie logujemy i nie zwracamy w /api/state.
+// Token OAuth czytamy PRZY KAZDYM wywolaniu, zeby samo podchwycic
+// odswiezenie, gdy Claude Code go wymieni. Windows/Linux trzyma go w pliku,
+// macOS w Keychain (Claude Code nie tworzy tam .credentials.json).
+// Nigdzie go nie kopiujemy, nie logujemy i nie zwracamy w /api/state.
+function readToken() {
+  return new Promise((resolve) => {
+    let cred;
+    try {
+      cred = JSON.parse(fs.readFileSync(CREDS, 'utf8'));
+    } catch (e) {
+      if (process.platform !== 'darwin') {
+        return resolve({ error: 'brak pliku poswiadczen' });
+      }
+      // Pierwszy odczyt pokazuje systemowy monit Keychain - "Always Allow"
+      // zalatwia sprawe raz na zawsze.
+      return execFile('security',
+        ['find-generic-password', '-s', 'Claude Code-credentials', '-w'],
+        (err, stdout) => {
+          if (err) return resolve({ error: 'brak dostepu do Keychain' });
+          try {
+            const c = JSON.parse(stdout);
+            resolve({ token: c.claudeAiOauth && c.claudeAiOauth.accessToken });
+          } catch (e2) {
+            resolve({ error: 'nieoczekiwany format wpisu Keychain' });
+          }
+        });
+    }
+    resolve({ token: cred.claudeAiOauth && cred.claudeAiOauth.accessToken });
+  });
+}
+
 async function pollLiveUsage() {
   if (!LIVE_ENABLED) return;
   if (Date.now() < backoffUntil) return;
-  let token;
-  try {
-    const cred = JSON.parse(fs.readFileSync(CREDS, 'utf8'));
-    token = cred.claudeAiOauth && cred.claudeAiOauth.accessToken;
-  } catch (e) {
-    liveError = 'brak pliku poswiadczen';
-    return;
-  }
+  const { token, error } = await readToken();
+  if (error) { liveError = error; return; }
   if (!token) { liveError = 'brak tokenu'; return; }
 
   try {

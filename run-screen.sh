@@ -6,6 +6,8 @@
 # Jezyk ekranu: zmienna PANEL_LANG=pl|en.
 cd "$(dirname "$0")" || exit 1
 export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin"
+# bez tego python buforuje stdout pod launchd i log jest pusty do flusha
+export PYTHONUNBUFFERED=1
 
 # uv czyta zaleznosci (pillow, pyserial) z naglowka render.py i sam je
 # dostarcza; bez uv trzeba je miec zainstalowane w python3 (patrz install.sh)

@@ -29,9 +29,11 @@ for your decision.
   scoped model over 7 days, computed locally from your transcripts.
 
 Everything runs locally. Your OAuth token is read from your own
-`~/.claude/.credentials.json` at request time, is never stored or logged, and
-is only ever sent to `api.anthropic.com` — the panel plugs into *your* Claude
-automatically because it reads *your* machine's Claude Code data.
+`~/.claude/.credentials.json` (macOS: from the Keychain, where Claude Code
+stores it — the first read pops a system prompt, click "Always Allow" for
+node) at request time, is never stored or logged, and is only ever sent to
+`api.anthropic.com` — the panel plugs into *your* Claude automatically
+because it reads *your* machine's Claude Code data.
 
 ## Hardware
 
