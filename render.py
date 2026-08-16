@@ -66,7 +66,7 @@ HOT   = (255, 77, 94)
 ACC   = (122, 162, 255)
 FABLE = (192, 132, 252)
 TRACK = (24, 33, 48)
-WAIT  = (56, 189, 248)   # blekit - sesja czeka na Twoja decyzje
+WAIT  = (56, 189, 248)   # blekit - kropka sesji pracujacej
 
 # Pas naglowka nalezacy WYLACZNIE do stworka. Baza rysuje tu czyste tlo,
 # diff go ignoruje - jedynym pisarzem jest animacja.
@@ -175,7 +175,6 @@ def block(d, y, h, label, lim, col_override=None):
 FOOTER_ROW_H = 26
 SESS_ROW_H = 27
 DOT_BOX = 16          # kwadrat odswiezany przy miganiu
-DONE = (30, 95, 80)   # sesja skonczona - swieci, ale nie miga
 
 # Pozycje kropek z ostatniej klatki: [(x, y, kolor, czy_miga)].
 LAST_DOTS = []
@@ -190,12 +189,12 @@ def dot_image(color):
 
 def state_style(state):
     """Kolor kropki i czy ma migac. Czerwien jest zarezerwowana dla paska
-    limitu krytycznego - sesje czekajace dostaja blekit."""
+    limitu krytycznego."""
     if state == "czeka":
-        return WAIT, True
+        return WARN, True
     if state == "pracuje":
-        return OK, True
-    return DONE, False
+        return WAIT, True
+    return OK, False
 
 
 def footer_row(d, y, k, v, vcol=TXT):
@@ -236,9 +235,9 @@ def draw(s, phase=True):
 
     # ---- alert: Claude czeka na odpowiedz ----
     if waiting:
-        d.rounded_rectangle([10, y, W - 10, y + 38], radius=8, fill=(14, 34, 48), outline=WAIT)
+        d.rounded_rectangle([10, y, W - 10, y + 38], radius=8, fill=(48, 34, 10), outline=WARN)
         msg = T["waitN"] % len(waiting) if len(waiting) > 1 else T["wait1"]
-        d.text((W // 2, y + 19), msg, font=f_mid, fill=(190, 230, 253), anchor="mm")
+        d.text((W // 2, y + 19), msg, font=f_mid, fill=(253, 226, 176), anchor="mm")
         y += 46
 
     # ---- pasek krytyczny (najgorszy limit >=85%) ----
@@ -298,7 +297,7 @@ def draw(s, phase=True):
         if name != full:
             name = name.rstrip() + "…"
         d.text((38, y + 3), name, font=f_sess,
-               fill=WAIT if row.get("state") == "czeka" else TXT)
+               fill=WARN if row.get("state") == "czeka" else TXT)
 
         idle = row.get("idleMs", 0) / 1000
         idle_txt = "%ds" % idle if idle < 60 else "%dm" % (idle / 60)
@@ -522,9 +521,9 @@ class Mascot:
             right = ox + self.SPR_W + 24 <= MASCOT_ZONE[2]
             bx = ox + self.SPR_W + 2 if right else ox - 24
             d.rounded_rectangle([bx, oy + 2, bx + 20, oy + 22],
-                                radius=4, fill=(14, 34, 48), outline=WAIT)
-            d.rectangle([bx + 9, oy + 6, bx + 11, oy + 14], fill=WAIT)
-            d.rectangle([bx + 9, oy + 17, bx + 11, oy + 19], fill=WAIT)
+                                radius=4, fill=(48, 34, 10), outline=WARN)
+            d.rectangle([bx + 9, oy + 6, bx + 11, oy + 14], fill=WARN)
+            d.rectangle([bx + 9, oy + 17, bx + 11, oy + 19], fill=WARN)
 
     def paint(self, d):
         """Nanosi stworka na podglad (wspolrzedne absolutne)."""

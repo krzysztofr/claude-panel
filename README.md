@@ -6,7 +6,7 @@ next to your keyboard, and in the browser.
 
 A tiny pixel mascot lives in the header: it sleeps when nothing is running,
 walks (then runs, kicking up dust) as your token burn rate rises, sweats when
-a limit passes 85%, and flashes a blue "!" bubble when a session is waiting
+a limit passes 85%, and flashes an orange "!" bubble when a session is waiting
 for your decision.
 
 > UI is switchable **English/Polish** — a PL/EN toggle in the browser
@@ -23,8 +23,8 @@ for your decision.
   countdowns. These come from the same endpoint the Claude Code client uses —
   no estimating.
 - **Active sessions by name** — your custom session titles (or AI-generated
-  ones), with a blinking status dot: green = working, steady dim = finished,
-  blue = **waiting for your input** (requires hooks, see below).
+  ones), with a blinking status dot: blue = working, steady green = finished,
+  orange = **waiting for your input** (requires hooks, see below).
 - **Token counters** — output tokens in the current 5-hour window and for the
   scoped model over 7 days, computed locally from your transcripts.
 
@@ -156,7 +156,7 @@ localStorage).
 
 ## "Waiting for you" alerts (optional)
 
-The blue state needs Claude Code hooks. Add to `~/.claude/settings.json`
+The waiting state needs Claude Code hooks. Add to `~/.claude/settings.json`
 (one entry per event: `Notification`, `Stop`, `UserPromptSubmit`):
 
 ```json
