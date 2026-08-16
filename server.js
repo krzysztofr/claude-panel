@@ -478,7 +478,11 @@ function buildState() {
         // Bez niego zostaje sam ruch w transkrypcie: pracuje albo skonczyla.
         let state = s.idleMs < WORKING_MS ? 'pracuje' : 'gotowe';
         if (fresh && a.state === 'czeka') state = 'czeka';
-        else if (fresh && a.state === 'gotowe' && s.idleMs >= WORKING_MS) state = 'gotowe';
+        // Swiezy meldunek Stop/SessionEnd wygrywa z mtime transkryptu:
+        // samo zamkniecie sesji dopisuje koncowe linie, wiec idleMs jest
+        // bliskie zeru i sesja "gotowa" migala jako pracujaca przez 45 s.
+        // Kazdy nowy ruch i tak przywroci "pracuje" przez UserPromptSubmit.
+        else if (fresh && a.state === 'gotowe') state = 'gotowe';
         return { ...s, state, hooked: !!fresh };
       })
       .sort((a, b) => {
@@ -513,11 +517,18 @@ const server = http.createServer((req, res) => {
         const h = JSON.parse(raw || '{}');
         const id = h.session_id || 'unknown';
         const ev = h.hook_event_name || 'unknown';
+        // Notification przychodzi w DWOCH sytuacjach: prosba o pozwolenie
+        // (prawdziwe "czeka") oraz przypomnienie po 60 s bezczynnosci
+        // ("Claude is waiting for your input"). To drugie przychodzi takze
+        // po skonczonej pracy i bez filtra wskrzeszalo baner "czeka" na
+        // sesjach dawno gotowych.
+        const idleNote = ev === 'Notification'
+          && /waiting for your input/i.test(h.message || '');
         alerts.set(id, {
           // SessionEnd: zamkniecie sesji w trakcie "czeka" nie zostawia
           // banera na 30 min TTL - sesja konczy jako "gotowe".
-          state: ev === 'Notification' ? 'czeka'
-            : (ev === 'Stop' || ev === 'SessionEnd') ? 'gotowe' : 'pracuje',
+          state: (ev === 'Notification' && !idleNote) ? 'czeka'
+            : (ev === 'Stop' || ev === 'SessionEnd' || idleNote) ? 'gotowe' : 'pracuje',
           event: ev,
           cwd: h.cwd ? path.basename(h.cwd) : '',
           message: h.message || '',
