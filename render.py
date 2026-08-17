@@ -229,7 +229,7 @@ def chart(d, y, hourly):
         # godziny pracy (9 i 17) tylko w dni robocze
         if hour in (9, 17) and dt.weekday() < 5:
             d.line([(bx, top), (bx, base)], fill=OK, width=1)
-        if hour % 4 == 0:
+        if hour in (0, 9, 13, 17, 21):
             d.text((bx + bw / 2, base + 3), str(hour), font=f_axis,
                    fill=DIM, anchor="ma")
 
