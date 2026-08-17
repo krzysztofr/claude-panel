@@ -38,6 +38,23 @@ let procCount = 0;
 let lastGoodLimits = null;
 const alerts = new Map();         // sessionId -> {state, cwd, message, at}
 
+// Meldunki hookow przezywaja restart serwera. Bez tego restart wskrzeszal
+// zamkniete sesje (zgubiony SessionEnd) i gubil stany kropek na ~30 min.
+const ALERTS_CACHE = path.join(__dirname, 'alerts-cache.json');
+try {
+  for (const [id, a] of JSON.parse(fs.readFileSync(ALERTS_CACHE, 'utf8'))) {
+    if (Date.now() - a.at < ALERT_TTL) alerts.set(id, a);
+  }
+} catch (e) {
+  // brak pliku przy pierwszym starcie to normalna sytuacja
+}
+function saveAlerts() {
+  try { fs.writeFileSync(ALERTS_CACHE, JSON.stringify([...alerts]), 'utf8'); }
+  catch (e) {
+    // brak zapisu psuje tylko wygode po restarcie, nie biezacy stan
+  }
+}
+
 // ---------------------------------------------------------------- limity z ~/.claude.json
 let livePayload = null;   // {fetchedAtMs, utilization} - prosto z API
 let liveError = null;
@@ -547,6 +564,7 @@ const server = http.createServer((req, res) => {
           message: h.message || '',
           at: Date.now(),
         });
+        saveAlerts();
       } catch {}
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end('{"ok":true}');

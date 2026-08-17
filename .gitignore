@@ -3,6 +3,7 @@ logs/
 *.log
 preview.png
 usage-cache.json
+alerts-cache.json
 stop.flag
 
 # python

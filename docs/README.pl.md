@@ -172,6 +172,8 @@ pustego ekranu).
 **Świeży odczyt limitów tylko w pamięci = procent potrafi się cofnąć.** Po
 restarcie serwera nowsza wartość znikała i panel wracał do starszego pliku,
 pokazując spadek zużycia, którego nie było. Stąd `usage-cache.json`.
+Z tego samego powodu meldunki hooków trafiają do `alerts-cache.json` —
+restart bez niego wskrzeszał zamknięte sesje i gubił stany kropek.
 
 **Endpoint zużycia potrafi odpowiedzieć HTTP 429.** Po odmowie panel czeka
 coraz dłużej (2, 4, 8… do 10 min) i jawnie przełącza się na plik, żółcąc wiek
