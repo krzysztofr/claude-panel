@@ -33,7 +33,6 @@ LANGS = {
         "limit5h": "Limit 5h", "weekly": "Tydzien", "sessions": "SESJE",
         "wait1": "CLAUDE CZEKA NA CIEBIE", "waitN": "%d SESJE CZEKAJA",
         "none": "nic nie pracuje", "more": "+%d dalszych", "na": "brak",
-        "tok5": "tokeny out / 5h", "tok7": "%s out / 7 dni",
         "reset_now": "reset lada moment", "reset_dh": "reset za %dd %dh",
         "reset_hm": "reset za %dh %02dm", "reset_m": "reset za %d min",
     },
@@ -41,7 +40,6 @@ LANGS = {
         "limit5h": "5h limit", "weekly": "Weekly", "sessions": "SESSIONS",
         "wait1": "CLAUDE IS WAITING FOR YOU", "waitN": "%d SESSIONS WAITING",
         "none": "nothing running", "more": "+%d more", "na": "n/a",
-        "tok5": "out tokens / 5h", "tok7": "%s out / 7 days",
         "reset_now": "resets any moment", "reset_dh": "resets in %dd %dh",
         "reset_hm": "resets in %dh %02dm", "reset_m": "resets in %d min",
     },
@@ -108,6 +106,7 @@ f_small = font("segoeui.ttf", 15)
 f_tiny  = font("segoeui.ttf", 13)
 f_sess  = font("seguisb.ttf", 17)   # nazwy sesji - najczesciej czytana rzecz
 f_sesst = font("segoeui.ttf", 14)   # czas przy sesji
+f_axis  = font("segoeui.ttf", 11)   # os godzinowa wykresu
 
 # Biale logo (RGBA) w prawym rogu naglowka; brak pliku = po prostu brak logo.
 try:
@@ -121,16 +120,6 @@ except OSError:
 def fetch():
     with urllib.request.urlopen(API, timeout=3) as r:
         return json.load(r)
-
-
-def fmt(n):
-    if n is None:
-        return "-"
-    if n >= 1_000_000:
-        return "%.1fM" % (n / 1_000_000)
-    if n >= 1_000:
-        return "%.0fk" % (n / 1_000)
-    return str(int(n))
 
 
 def color_for(p):
@@ -182,8 +171,9 @@ def block(d, y, h, label, lim, col_override=None):
     bar(d, 14, y + h - 14, W - 28, 11, pct, col)
 
 
-FOOTER_ROW_H = 26
 SESS_ROW_H = 27
+CHART_BARS_H = 46
+CHART_H = 8 + CHART_BARS_H + 16   # odstep + slupki + os godzinowa
 DOT_BOX = 16          # kwadrat odswiezany przy miganiu
 
 # Pozycje kropek z ostatniej klatki: [(x, y, kolor, czy_miga)].
@@ -207,9 +197,31 @@ def state_style(state):
     return OK, False
 
 
-def footer_row(d, y, k, v, vcol=TXT):
-    d.text((14, y), k, font=f_small, fill=DIM)
-    d.text((W - 14, y - 2), v, font=f_mid, fill=vcol, anchor="ra")
+def chart(d, y, hourly):
+    """Slupki tokenow out za ostatnie 24 h (ostatni = biezaca godzina,
+    na zielono). Czerwona pionowa linia = polnoc. Os: co 4. godzina."""
+    x0, x1 = 14, W - 14
+    d.line([(x0, y), (x1, y)], fill=LINE, width=1)
+    top = y + 8
+    base = top + CHART_BARS_H
+    if not hourly:
+        d.text((x0, top + 4), T["na"], font=f_small, fill=DIM)
+        return
+    mx = max((h.get("out") or 0) for h in hourly) or 1
+    bw = (x1 - x0) / len(hourly)
+    last = len(hourly) - 1
+    for i, h in enumerate(hourly):
+        bx = x0 + i * bw
+        hour = datetime.fromtimestamp(h["t"] / 1000).hour
+        bh = round(CHART_BARS_H * (h.get("out") or 0) / mx)
+        if bh:
+            d.rectangle([bx + 1, base - bh, bx + bw - 2, base],
+                        fill=OK if i == last else ACC)
+        if hour == 0:
+            d.line([(bx, top), (bx, base)], fill=HOT, width=1)
+        if hour % 4 == 0:
+            d.text((bx + bw / 2, base + 3), str(hour), font=f_axis,
+                   fill=DIM, anchor="ma")
 
 
 def draw(s, phase=True):
@@ -274,9 +286,8 @@ def draw(s, phase=True):
                font=f_mid, fill=(255, 217, 221), anchor="mm")
         y += 42
 
-    # ---- stopka zakotwiczona na DOLE ----
-    foot_h = 12 + 2 * FOOTER_ROW_H
-    foot_y = H - foot_h
+    # ---- stopka (wykres 24h) zakotwiczona na DOLE ----
+    foot_y = H - CHART_H
 
     # ---- trzy limity ----
     need_sess = 26 + 2 * SESS_ROW_H
@@ -327,18 +338,8 @@ def draw(s, phase=True):
         d.text((38, y + 4), T["more"] % (len(ses) - len(shown)),
                font=f_tiny, fill=DIM)
 
-    # ---- stopka: tokeny ----
-    w5 = s.get("window5h") or {}
-    w7 = s.get("window7d") or {}
-    # tokeny modelu z limitem scoped - nazwa z API, nie zaszyta na sztywno
-    sc_disp = (sc or {}).get("name") or "model"
-    sc_tok = (w7.get("models") or {}).get(sc_disp, {}).get("out", 0)
-
-    d.line([(14, foot_y), (W - 14, foot_y)], fill=LINE, width=1)
-    fy = foot_y + 12
-    footer_row(d, fy, T["tok5"], fmt(w5.get("out")))
-    fy += FOOTER_ROW_H
-    footer_row(d, fy, T["tok7"] % sc_disp, fmt(sc_tok), FABLE)
+    # ---- stopka: wykres tokenow out / 24h ----
+    chart(d, foot_y, s.get("hourly") or [])
 
     global LAST_DOTS
     LAST_DOTS = dots

@@ -20,8 +20,9 @@ Stan sygnalizuje kropka:
 | **błękitna, miga** (+ błękitna nazwa) | **czeka na Twoją decyzję** |
 | przygaszona zieleń, świeci | sesja skończyła |
 
-**Tokeny** wyjściowe w oknie 5h i Fable w 7 dniach — na dole, bo zmieniają
-się wolno.
+**Wykres godzinowy** — tokeny wyjściowe na godzinę z ostatnich 24 h, na dole;
+bieżąca godzina na zielono, czerwona pionowa linia o północy. Surowe liczniki
+tokenów (okno 5h, model z limitem w 7 dniach) zostały w panelu przeglądarkowym.
 
 ---
 

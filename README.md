@@ -25,8 +25,10 @@ for your decision.
 - **Active sessions by name** — your custom session titles (or AI-generated
   ones), with a blinking status dot: blue = working, steady green = finished,
   orange = **waiting for your input** (requires hooks, see below).
-- **Token counters** — output tokens in the current 5-hour window and for the
-  scoped model over 7 days, computed locally from your transcripts.
+- **Hourly usage chart** — output tokens per hour over the last 24 h, computed
+  locally from your transcripts; current hour highlighted, red line at
+  midnight. The browser dashboard additionally shows raw token counters
+  (5-hour window, scoped model over 7 days).
 
 Everything runs locally. Your OAuth token is read from your own
 `~/.claude/.credentials.json` (macOS: from the Keychain, where Claude Code
