@@ -233,7 +233,12 @@ def draw(s, phase=True):
         sec = age / 1000
         age_txt = ("%ds" % sec if sec < 90 else
                    "%dmin" % (sec / 60) if sec < 5400 else "%.0fh" % (sec / 3600))
-        age_col = WARN if (lim.get("liveError") or sec > 5400) else DIM
+        # Gdy API odmawia, dopisujemy kod HTTP - sam kolor nie mowil DLACZEGO
+        # dane sa stare (np. "8h 429" = blokada rate-limit po stronie API).
+        err = lim.get("liveError")
+        if err:
+            age_txt += " " + (err.split()[1] if err.startswith("HTTP ") else "!")
+        age_col = WARN if (err or sec > 5400) else DIM
 
     # ---- naglowek: strefa stworka + wiek danych + logo ----
     rx = W - 14

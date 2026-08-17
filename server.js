@@ -47,7 +47,7 @@ let lastAccount = null;
 // Po odmowie odczekujemy coraz dluzej, zamiast dobijac sie w kolko.
 let backoffUntil = 0;
 let backoffMs = 0;
-const BACKOFF_MAX = 30 * 60 * 1000;
+const BACKOFF_MAX = 10 * 60 * 1000;
 
 // Token OAuth czytamy PRZY KAZDYM wywolaniu, zeby samo podchwycic
 // odswiezenie, gdy Claude Code go wymieni. Windows/Linux trzyma go w pliku,

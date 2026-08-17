@@ -168,8 +168,8 @@ restarcie serwera nowsza wartość znikała i panel wracał do starszego pliku,
 pokazując spadek zużycia, którego nie było. Stąd `usage-cache.json`.
 
 **Endpoint zużycia potrafi odpowiedzieć HTTP 429.** Po odmowie panel czeka
-coraz dłużej (2, 4, 8… do 30 min) i jawnie przełącza się na plik, żółcąc wiek
-danych. Pauza jest sprawdzana **przed** licznikiem czasu — inaczej po jej
+coraz dłużej (2, 4, 8… do 10 min) i jawnie przełącza się na plik, żółcąc wiek
+danych. Ekran dopisuje wtedy kod HTTP obok wieku (np. „8h 429"). Pauza jest sprawdzana **przed** licznikiem czasu — inaczej po jej
 końcu trzeba by odczekać jeszcze całe okno 120 s.
 
 **Zmiana w `render.py` nie działa, dopóki nie ubijesz pętli.** Działający
