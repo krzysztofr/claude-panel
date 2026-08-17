@@ -58,10 +58,10 @@ W, H = 320, 480          # natywny pion
 
 BG    = (7, 9, 13)
 LINE  = (28, 37, 48)
-DIM   = (93, 107, 125)
+DIM   = (165, 178, 195)  # kiedys ciemniejszy - na ekranie za slabo czytelny
 TXT   = (223, 231, 240)
-LABEL = (165, 178, 195)  # naglowki limitow - cichsze niz dane
-SUB   = (135, 150, 170)  # "reset za..." - jasniej niz DIM, zeby dalo sie czytac
+LABEL = (165, 178, 195)  # naglowki limitow
+SUB   = (165, 178, 195)  # "reset za..."
 OK    = (34, 211, 167)
 WARN  = (245, 178, 61)
 HOT   = (255, 77, 94)
