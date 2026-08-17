@@ -27,7 +27,7 @@ for your decision.
   orange = **waiting for your input** (requires hooks, see below).
 - **Hourly usage chart** — output tokens per hour over the last 24 h, computed
   locally from your transcripts; current hour highlighted, red line at
-  midnight. The browser dashboard additionally shows raw token counters
+  midnight, green lines at 9:00/17:00 on workdays. The browser dashboard additionally shows raw token counters
   (5-hour window, scoped model over 7 days).
 
 Everything runs locally. Your OAuth token is read from your own

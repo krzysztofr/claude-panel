@@ -212,13 +212,17 @@ def chart(d, y, hourly):
     last = len(hourly) - 1
     for i, h in enumerate(hourly):
         bx = x0 + i * bw
-        hour = datetime.fromtimestamp(h["t"] / 1000).hour
+        dt = datetime.fromtimestamp(h["t"] / 1000)
+        hour = dt.hour
         bh = round(CHART_BARS_H * (h.get("out") or 0) / mx)
         if bh:
             d.rectangle([bx + 1, base - bh, bx + bw - 2, base],
                         fill=OK if i == last else ACC)
         if hour == 0:
             d.line([(bx, top), (bx, base)], fill=HOT, width=1)
+        # godziny pracy (9 i 17) tylko w dni robocze
+        if hour in (9, 17) and dt.weekday() < 5:
+            d.line([(bx, top), (bx, base)], fill=OK, width=1)
         if hour % 4 == 0:
             d.text((bx + bw / 2, base + 3), str(hour), font=f_axis,
                    fill=DIM, anchor="ma")

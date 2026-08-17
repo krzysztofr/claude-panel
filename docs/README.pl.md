@@ -21,7 +21,8 @@ Stan sygnalizuje kropka:
 | przygaszona zieleń, świeci | sesja skończyła |
 
 **Wykres godzinowy** — tokeny wyjściowe na godzinę z ostatnich 24 h, na dole;
-bieżąca godzina na zielono, czerwona pionowa linia o północy. Surowe liczniki
+bieżąca godzina na zielono, czerwona pionowa linia o północy, zielone o
+9:00/17:00 w dni robocze. Surowe liczniki
 tokenów (okno 5h, model z limitem w 7 dniach) zostały w panelu przeglądarkowym.
 
 ---
