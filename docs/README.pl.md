@@ -102,12 +102,18 @@ się do niej jako licznik agentów.
 
 ## Rysowanie przyrostowe (od 2026-08-04)
 
-Pełna klatka (300 KB = ~3 s przy ~100 KB/s kabla) idzie **tylko** na start
-i po reconnect. Potem `dirty_rects()` porównuje nową klatkę z modelem tego,
-co wisi na ekranie (`model` w `main()`), i wysyła wyłącznie zmienione
-prostokąty — typowa zmiana to **~200 B zamiast 307 200 B**. Gdy zmiana
-przekracza 45% ekranu (np. pojawienie się banera przesuwa cały układ),
-idzie pełna klatka.
+Pełna klatka (300 KB = ~3 s przy ~100 KB/s kabla) idzie na start, po
+reconnect i okresowo (`--full-every`, domyślnie 300 s). Potem
+`dirty_rects()` porównuje nową klatkę z modelem tego, co wisi na ekranie
+(`model` w `main()`), i wysyła wyłącznie zmienione prostokąty — typowa
+zmiana to **~200 B zamiast 307 200 B**. Gdy zmiana przekracza 85% ekranu
+(np. pojawienie się banera przesuwa cały układ), idzie pełna klatka.
+
+Okresowa pełna klatka to samoleczenie: protokół nie ma sum kontrolnych,
+więc jeden zgubiony bajt cicho rozjeżdża parser ekranu i śmieci (duchy
+timerów, przesunięte łatki) wisiałyby wiecznie — diff nie przemalowuje
+„niezmienionych" miejsc. Odświeżenie czeka na bezczynność sesji (blokuje
+ekran na ~3 s), a po 3x oknie idzie bezwarunkowo.
 
 Strefa `MASCOT_ZONE` w nagłówku jest **wyłączona z diffa** — jedynym jej
 pisarzem jest animacja stworka. Po każdej pełnej klatce stworek dostaje

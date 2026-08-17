@@ -702,6 +702,9 @@ def main():
     ap.add_argument("--blink", type=float, default=0.6, help="polokres migania kropek")
     ap.add_argument("--tick", type=float, default=0.15, help="krok animacji stworka")
     ap.add_argument("--brightness", type=int, default=80)
+    ap.add_argument("--full-every", type=float, default=300,
+                    help="co ile sekund pelna klatka zamalowuje ewentualne "
+                         "smieci (protokol nie ma sum kontrolnych)")
     ap.add_argument("--lang", choices=sorted(LANGS),
                     default=os.environ.get("PANEL_LANG", "pl"),
                     help="jezyk napisow na ekranie / screen language")
@@ -729,11 +732,14 @@ def main():
     blink_acc = 0.0
     phase = True
 
+    last_full = time.time()
+
     def full_to_screen(img):
-        nonlocal model
+        nonlocal model, last_full
         if screen and screen.send(img):
             model = img.copy()
             screen.needs_full = False
+            last_full = time.time()
             # pelna klatka wymazala stworka (baza ma pusta strefe) -
             # wymuszamy natychmiastowe odrysowanie w nowym ticku
             mascot.prev_box = None
@@ -800,6 +806,18 @@ def main():
                     )
 
                     base = new_base
+
+                    # Protokol nie ma sum kontrolnych: jeden zgubiony bajt
+                    # cicho rozjezdza parser ekranu i smieci wisza wiecznie,
+                    # bo diff nie przemalowuje "niezmienionych" miejsc.
+                    # Okresowa pelna klatka je zamalowuje. Blokuje ekran na
+                    # ~3 s, wiec czekamy na bezczynnosc sesji; po 3x oknie
+                    # idzie bezwarunkowo - ruchliwy ekran tez musi sie leczyc.
+                    busy = any(x.get("state") in ("pracuje", "czeka") for x in ses)
+                    over = now - last_full
+                    if screen and not screen.needs_full and over >= args.full_every \
+                            and (not busy or over >= 3 * args.full_every):
+                        screen.needs_full = True
 
                     # podglad ze stworkiem; zablokowany plik nie moze
                     # ubic petli

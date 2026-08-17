@@ -181,7 +181,9 @@ blocking Claude Code. On macOS/Linux use `curl` instead of `curl.exe`.
 - `render.py` — draws a 320×480 frame with Pillow and sends **only changed
   rectangles** over serial (a typical update is ~200 bytes vs 307 KB for a
   full frame). The mascot and blinking dots are tiny partial updates between
-  data refreshes.
+  data refreshes. A periodic full repaint (`--full-every`, default 5 min,
+  waits for session idle) self-heals ghost artifacts — the protocol has no
+  checksums, so a silently desynced parser would otherwise show them forever.
 - `turing.py` — minimal rev-A protocol driver: 64 KB write chunks (small
   chunks die on per-write USB overhead), `write_timeout` so a hung screen
   can't freeze the loop, and a parser resync on connect.
