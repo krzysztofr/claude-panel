@@ -64,8 +64,7 @@ Każdy klon `1A86:5722` zadziała tak samo.)*
 | `panel-start.vbs` | (Windows) uruchamia oba bez okien konsoli |
 | `start.bat` | (Windows) ręczne odpalenie samego serwera |
 | `install.sh` / `start.sh` / `run-*.sh` | (macOS) instalator, ręczny start i skrypty startowe dla launchd |
-| `usage-cache.json` | ostatni udany odczyt limitów (tworzony automatycznie) |
-| `logs/` | logi serwera i ekranu, czyszczone przy starcie |
+| `logs/` | wszystkie artefakty runtime: logi, `preview.png`, `usage-cache.json`, `alerts-cache.json` — jeden folder do wykluczenia z synchronizacji chmurowej |
 
 ---
 
@@ -177,8 +176,8 @@ pustego ekranu).
 
 **Świeży odczyt limitów tylko w pamięci = procent potrafi się cofnąć.** Po
 restarcie serwera nowsza wartość znikała i panel wracał do starszego pliku,
-pokazując spadek zużycia, którego nie było. Stąd `usage-cache.json`.
-Z tego samego powodu meldunki hooków trafiają do `alerts-cache.json` —
+pokazując spadek zużycia, którego nie było. Stąd `logs/usage-cache.json`.
+Z tego samego powodu meldunki hooków trafiają do `logs/alerts-cache.json` —
 restart bez niego wskrzeszał zamknięte sesje i gubił stany kropek.
 
 **Endpoint zużycia potrafi odpowiedzieć HTTP 429.** Po odmowie panel czeka
@@ -187,7 +186,7 @@ danych. Ekran dopisuje wtedy kod HTTP obok wieku (np. „8h 429"). Pauza jest sp
 końcu trzeba by odczekać jeszcze całe okno 120 s.
 
 **Zmiana w `render.py` nie działa, dopóki nie ubijesz pętli.** Działający
-proces nadpisuje `preview.png` starą wersją co kilka sekund. Ubij `python`,
+proces nadpisuje `logs/preview.png` starą wersją co kilka sekund. Ubij `python`,
 nadzorca podniesie go z nowym kodem.
 
 **Nie migaj przez przerysowywanie całej klatki.** Pełny obraz to 300 KB

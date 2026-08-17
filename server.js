@@ -20,7 +20,11 @@ const LIVE_ENABLED = process.env.PANEL_NO_API !== '1';
 // Ostatni udany odczyt z API trzymamy takze na dysku. Bez tego restart
 // serwera kasowal swiezsza wartosc i panel wracal do starego pliku - czyli
 // procent POTRAFIL SIE COFNAC, sugerujac spadek zuzycia, ktorego nie bylo.
-const USAGE_CACHE = path.join(__dirname, 'usage-cache.json');
+// Wszystkie artefakty runtime laduja w logs/ - jeden folder do wykluczenia
+// z synchronizacji chmurowej (pliki pisane co chwile robily w niej szum).
+const LOGS_DIR = path.join(__dirname, 'logs');
+try { fs.mkdirSync(LOGS_DIR, { recursive: true }); } catch (e) {}
+const USAGE_CACHE = path.join(LOGS_DIR, 'usage-cache.json');
 const PUBLIC = path.join(__dirname, 'public');
 const PORT = Number(process.env.PANEL_PORT) || 4747;
 
@@ -40,7 +44,7 @@ const alerts = new Map();         // sessionId -> {state, cwd, message, at}
 
 // Meldunki hookow przezywaja restart serwera. Bez tego restart wskrzeszal
 // zamkniete sesje (zgubiony SessionEnd) i gubil stany kropek na ~30 min.
-const ALERTS_CACHE = path.join(__dirname, 'alerts-cache.json');
+const ALERTS_CACHE = path.join(LOGS_DIR, 'alerts-cache.json');
 try {
   for (const [id, a] of JSON.parse(fs.readFileSync(ALERTS_CACHE, 'utf8'))) {
     if (Date.now() - a.at < ALERT_TTL) alerts.set(id, a);

@@ -1,9 +1,7 @@
 # artefakty runtime - zawieraja dane wlasciciela maszyny
+# (wszystko poza stop.flag laduje w logs/)
 logs/
 *.log
-preview.png
-usage-cache.json
-alerts-cache.json
 stop.flag
 
 # python

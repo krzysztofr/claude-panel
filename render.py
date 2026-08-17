@@ -15,8 +15,8 @@ W naglowku zamiast napisu CLAUDE mieszka pikselowy stworek:
   - poci sie, gdy najgorszy limit >= 85%
   - staje i miga niebieskim dymkiem "!", gdy sesja czeka na Twoja decyzje
 
-  python render.py                 -> jedna klatka do preview.png
-  python render.py --loop          -> odswieza preview.png
+  python render.py                 -> jedna klatka do logs/preview.png
+  python render.py --loop          -> odswieza logs/preview.png
   python render.py --serial AUTO   -> rysuje na ekranie (auto-wykrycie portu)
 """
 import argparse
@@ -77,6 +77,12 @@ MASCOT_ZONE = (6, 2, 208, 40)
 # parser ekranu - kolejny proces wysyla komendy, a ekran zjada je jako
 # brakujace piksele i pokazuje smieci.
 STOP_FLAG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stop.flag")
+
+# Podglad laduje w logs/ jak reszta artefaktow runtime - jeden folder
+# do wykluczenia z synchronizacji chmurowej (zapis co ~2 s robil szum).
+LOGS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+os.makedirs(LOGS_DIR, exist_ok=True)
+PREVIEW = os.path.join(LOGS_DIR, "preview.png")
 
 
 # Segoe jest tylko na Windows - na macOS bierzemy odpowiednik z Arial
@@ -824,7 +830,7 @@ def main():
                     try:
                         prev = base.copy()
                         mascot.paint(ImageDraw.Draw(prev))
-                        prev.save("preview.png")
+                        prev.save(PREVIEW)
                     except Exception as e:
                         print("blad zapisu podgladu:", e)
 
