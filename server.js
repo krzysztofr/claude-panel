@@ -491,6 +491,11 @@ function buildState() {
         // bliskie zeru i sesja "gotowa" migala jako pracujaca przez 45 s.
         // Kazdy nowy ruch i tak przywroci "pracuje" przez UserPromptSubmit.
         else if (fresh && a.state === 'gotowe') state = 'gotowe';
+        // ...i symetrycznie: tura trwa (UserPromptSubmit bez pozniejszego
+        // Stop), a Claude potrafi >45 s nic nie dopisac do transkryptu
+        // (dluga komenda, dlugie myslenie) - bez tego kropka robila sie
+        // zielona w polowie pracy. Zgubiony Stop = najwyzej 30 min TTL.
+        else if (fresh && a.state === 'pracuje') state = 'pracuje';
         return { ...s, state, hooked: !!fresh };
       })
       .sort((a, b) => {

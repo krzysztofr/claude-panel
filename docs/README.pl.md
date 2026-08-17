@@ -16,9 +16,13 @@ Stan sygnalizuje kropka:
 
 | Kropka | Znaczenie |
 |---|---|
-| zielona, miga | sesja pracuje |
-| **błękitna, miga** (+ błękitna nazwa) | **czeka na Twoją decyzję** |
-| przygaszona zieleń, świeci | sesja skończyła |
+| błękitna, miga | sesja pracuje |
+| **pomarańczowa, miga** (+ pomarańczowa nazwa) | **czeka na Twoją decyzję** |
+| zielona, świeci | sesja skończyła |
+
+Stan „pracuje" trzyma się od `UserPromptSubmit` do `Stop` — długa komenda
+albo długie myślenie (>45 s bez zapisu w transkrypcie) nie zieleni kropki
+w połowie tury.
 
 **Wykres godzinowy** — tokeny wyjściowe na godzinę z ostatnich 24 h, na dole;
 bieżąca godzina na zielono, czerwona pionowa linia o północy, zielone o
@@ -219,11 +223,11 @@ i statusie krytycznym mogło to wpuścić prosto w ścianę limitu.
 
 ## Czego brakuje
 
-**Hooki `Notification` / `Stop` / `UserPromptSubmit`** nie są wpięte —
-modyfikacja `~/.claude/settings.json` została zablokowana przez zabezpieczenie.
-Bez nich **żadna sesja nie wejdzie w stan „czeka"**, więc błękitna kropka
-i baner „CLAUDE CZEKA NA CIEBIE" nigdy się nie zapalą, a wszystko miga na
-zielono. Serwer ma gotowy endpoint `POST /api/hook`.
+**Hooki `Notification` / `Stop` / `UserPromptSubmit` / `SessionEnd`** muszą
+być wpięte w `~/.claude/settings.json` (u autora już są). Bez nich **żadna
+sesja nie wejdzie w stan „czeka"**, więc pomarańczowa kropka i baner
+„CLAUDE CZEKA NA CIEBIE" nigdy się nie zapalą, a stany zgaduje sam ruch
+w transkrypcie. Serwer ma gotowy endpoint `POST /api/hook`.
 
 Do wklejenia obok istniejących kluczy w `~/.claude/settings.json`
 (dla każdego z trzech zdarzeń ta sama komenda):
