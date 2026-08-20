@@ -1,5 +1,17 @@
 # Claude Panel
 
+> **Status: fork, no longer developed here.**
+> This is my fork of [KonradLe/claude-panel](https://github.com/KonradLe/claude-panel).
+> It adds macOS support (OAuth token read from the Keychain, launchd install),
+> fixes for false "waiting"/"working" session states, an hourly usage chart on
+> the screen, and smaller screen/readability changes.
+>
+> I have stopped further work on this fork. Development continues in a separate
+> application: a Python hub that publishes the same data over **MQTT**, with a
+> **mobile app** client and a **Waveshare ESP32-S3-Touch-LCD-3.5** hardware
+> client instead of the USB Turing screen. That repository is not public yet -
+> if you are interested, contact me.
+
 A desk-side usage monitor for [Claude Code](https://claude.com/claude-code):
 your rate limits, active sessions and token burn — on a cheap 3.5" USB screen
 next to your keyboard, and in the browser.
